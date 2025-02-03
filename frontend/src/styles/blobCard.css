@@ -1,0 +1,35 @@
+.blob-card {
+    margin: 4px;
+    padding: 8px;
+    border-radius: 4px;
+    background: #222;
+    color: white;
+}
+
+.blob-horizontal-bar {
+    display: flex;
+    height: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.blob-filled {
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.blob-filled .blob-label {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: 10px;
+}
+
+.blob-unfilled {
+    background: #000;
+}

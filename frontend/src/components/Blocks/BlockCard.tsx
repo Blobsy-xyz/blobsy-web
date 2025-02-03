@@ -1,5 +1,7 @@
 import React from 'react';
 import {BlobData, Block} from '../../store/store';
+import MegaBlobBar from './MegaBlobBar';
+import '../../styles/blockCard.css';
 
 interface BlockCardProps {
     block: Block;
@@ -7,36 +9,40 @@ interface BlockCardProps {
 
 const BlockCard: React.FC<BlockCardProps> = ({block}) => {
     return (
-        <div style={{
-            margin: '8px',
-            padding: '16px',
-            backgroundColor: '#1E1E1E',
-            borderRadius: '8px',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
-        }}>
+        <div className="block-card">
             {/* Header Row */}
-            <div style={{display: 'flex', justifyContent: 'space-between'}}>
+            <div className="block-card-header">
                 <span>Block #{block.block_number}</span>
                 <span>{new Date(block.block_timestamp).toLocaleTimeString()}</span>
             </div>
+
             {/* Original Blobs Row */}
-            <div style={{marginTop: '8px'}}>
+            <div className="original-blobs-row">
                 {block.blobs.map((blob: BlobData, idx: number) => (
-                    <div key={idx} style={{
-                        margin: '4px 0',
-                        background: blob.name === 'rollup A' ? '#FF5733' : '#33FFBD', // sample rollup colors
-                        height: `${blob.filled}%`,
-                        width: '20px',
-                        display: 'inline-block',
-                        marginRight: '4px'
-                    }}>
-                        <small>{blob.blob_fee}</small>
+                    <div
+                        key={idx}
+                        className="blob-bar"
+                        style={{background: blob.color, height: `${blob.filled}%`}}
+                    >
+                        <div><small>{blob.filled}</small></div>
                     </div>
                 ))}
             </div>
-            {/* Mega Blobs Row (highlighted) - placeholder until aggregation logic */}
-            <div style={{marginTop: '8px', backgroundColor: '#333', padding: '4px', borderRadius: '4px'}}>
-                <span>Mega Blobs (coming soon)</span>
+
+            {/* Mega Blobs Row */}
+            <div className="mega-blobs-row">
+                {block.megaBlobs && block.megaBlobs.length > 0 ? (
+                    block.megaBlobs.map((megaBlob, idx) => (
+                        <div key={idx}>
+                            <div style={{fontSize: '10px', marginBottom: '2px'}}>
+                                {megaBlob.name} - Value: {megaBlob.value.toFixed(4)}
+                            </div>
+                            <MegaBlobBar megaBlob={megaBlob}/>
+                        </div>
+                    ))
+                ) : (
+                    <span>Mega Blobs (coming soon)</span>
+                )}
             </div>
         </div>
     );

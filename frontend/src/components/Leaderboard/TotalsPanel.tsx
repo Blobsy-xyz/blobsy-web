@@ -1,22 +1,26 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
+import '../../styles/leaderboard.css';
 
 const TotalsPanel: React.FC = () => {
-    // In a full implementation, these values come from global state
-    const totals = {
-        originalCost: 0.005,
-        aggregatedCost: 0.003,
-        savings: 0.002,
-        originalBlobs: 10,
-        aggregatedBlobs: 5
-    };
+    const leaderboard = useSelector((state: RootState) => state.leaderboard);
+    const totals = Object.values(leaderboard).reduce((acc, entry) => {
+        acc.originalCost += entry.cost;
+        acc.aggregatedCost += entry.aggCost;
+        acc.savings += (entry.cost - entry.aggCost);
+        acc.noOfBlobs += entry.noOfBlobs;
+        acc.noOfAggBlobs += entry.noOfAggBlobs;
+        return acc;
+    }, { originalCost: 0, aggregatedCost: 0, savings: 0, noOfBlobs: 0, noOfAggBlobs: 0 });
 
     return (
-        <div style={{ padding: '8px', backgroundColor: '#333', borderRadius: '4px', marginBottom: '8px' }}>
-            <div>Original Cost: {totals.originalCost}</div>
-            <div>Aggregated Cost: {totals.aggregatedCost}</div>
-            <div>Savings: {totals.savings}</div>
-            <div># Original Blobs: {totals.originalBlobs}</div>
-            <div># Aggregated Blobs: {totals.aggregatedBlobs}</div>
+        <div className="totals-panel">
+            <div>Original Cost: {totals.originalCost.toFixed(4)}</div>
+            <div>Aggregated Cost: {totals.aggregatedCost.toFixed(4)}</div>
+            <div>Savings: {totals.savings.toFixed(4)}</div>
+            <div>No. of Blobs: {totals.noOfBlobs}</div>
+            <div>No. of Agg Blobs: {totals.noOfAggBlobs}</div>
         </div>
     );
 };

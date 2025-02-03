@@ -1,24 +1,29 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { LeaderboardEntry } from '../../store/store';
+import '../../styles/rollupCard.css';
 
 interface RollupCardProps {
-    rollup: string;
-    stats: { posted: number; originalFees: number; megaBlobFees: number };
+    entry: LeaderboardEntry;
 }
 
-const RollupCard: React.FC<RollupCardProps> = ({ rollup, stats }) => {
+const RollupCard: React.FC<RollupCardProps> = ({ entry }) => {
+    const [flash, setFlash] = useState(false);
+
+    useEffect(() => {
+        setFlash(true);
+        const timeout = setTimeout(() => setFlash(false), 1000);
+        return () => clearTimeout(timeout);
+    }, [entry.cost, entry.aggCost, entry.noOfBlobs, entry.noOfAggBlobs]);
+
     return (
-        <div style={{
-            margin: '4px 0',
-            padding: '8px',
-            backgroundColor: rollup === 'rollup A' ? '#FF5733' : '#33FFBD',
-            borderRadius: '4px'
-        }}>
-            <div>{rollup}</div>
-            <div>Blobs Posted: {stats.posted}</div>
-            <div>Original Fees: {stats.originalFees}</div>
-            <div>Mega Blob Fees: {stats.megaBlobFees}</div>
-            <div>Savings: {(stats.originalFees - stats.megaBlobFees).toFixed(4)}</div>
-        </div>
+        <tr className={flash ? 'flash' : ''} style={{ backgroundColor: entry.color }}>
+            <td>{entry.name}</td>
+            <td>{entry.cost.toFixed(4)}</td>
+            <td>{entry.aggCost.toFixed(4)}</td>
+            <td>{(entry.cost - entry.aggCost).toFixed(4)}</td>
+            <td>{entry.noOfBlobs}</td>
+            <td>{entry.noOfAggBlobs}</td>
+        </tr>
     );
 };
 

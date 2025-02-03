@@ -1,0 +1,27 @@
+/* src/styles/rollupCard.css */
+
+/* Flash animation for updated leaderboard entries */
+@keyframes flash {
+    0% {
+        background-color: yellow;
+    }
+    100% {
+        background-color: inherit;
+    }
+}
+
+/* Apply the flash animation */
+.flash {
+    animation: flash 1s ease-out;
+}
+
+/* Optional additional styles for the rollup card row */
+.rollup-row {
+    transition: background-color 0.5s ease;
+}
+
+.rollup-row td {
+    padding: 8px;
+    border: 1px solid #333;
+    text-align: center;
+}
