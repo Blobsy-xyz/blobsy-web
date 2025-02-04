@@ -22,3 +22,7 @@
     transform: translate(-50%, -50%);
     white-space: nowrap;
 }
+
+.mega-blob-megablob {
+    border: 3px solid darkred;
+}

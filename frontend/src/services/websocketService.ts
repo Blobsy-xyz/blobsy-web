@@ -49,7 +49,7 @@ class WebSocketService {
     private socket: WebSocket | null = null;
 
     connect() {
-        this.socket = new WebSocket('ws://index.kriptal.io:9933/blob-info');
+        this.socket = new WebSocket('wss://blober.kriptal.io/ws');
 //        this.socket = new WebSocket('ws://localhost:8080');
         this.socket.onopen = () => console.log('Connected to WebSocket server.');
         this.socket.onmessage = (event) => {

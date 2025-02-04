@@ -20,9 +20,11 @@ const MegaBlobBar: React.FC<MegaBlobBarProps> = ({megaBlob}) => {
     const usedFill = megaBlob.segments.reduce((sum, seg) => sum + seg.filled, 0);
     // Unused percentage is the remainder to reach 100%
     const unusedFill = 100 - usedFill;
-
+    const isMegablob = megaBlob.segments.length > 1;
+    
     return (
-        <div className="mega-blob-bar" title={`${megaBlob.name} (${megaBlob.filled}%)`}>
+        <div className={`mega-blob-bar ${isMegablob ? 'mega-blob-megablob' : ''}`}
+             title={`${megaBlob.name} (${megaBlob.filled}%)`}>
             {megaBlob.segments.map((segment, idx) => (
                 <div
                     key={idx}

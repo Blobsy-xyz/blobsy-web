@@ -1,0 +1,25 @@
+/* src/components/Header.css */
+.header {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #1E1E1E;
+}
+
+.logo {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+
+.brand-info h1 {
+    margin: 0;
+    color: #fff;
+    font-size: 24px;
+}
+
+.brand-info p {
+    margin: 0;
+    color: #ccc;
+    font-size: 14px;
+}
