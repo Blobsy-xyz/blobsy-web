@@ -5,9 +5,8 @@ import RollupList from './RollupList';
 const Leaderboard: React.FC = () => {
     return (
         <div>
-            <h3>Leaderboard</h3>
-            <TotalsPanel />
-            <RollupList />
+            <TotalsPanel/>
+            <RollupList/>
         </div>
     );
 };

@@ -5,6 +5,8 @@ import BlobQueue from './components/BlobQueue/BlobQueue';
 import Leaderboard from './components/Leaderboard/Leaderboard';
 import {aggregatorService} from './services/aggregatorService';
 import Header from './components/Header';
+import Footer from "./components/Footer";
+
 
 const App: React.FC = () => {
     useEffect(() => {
@@ -17,14 +19,15 @@ const App: React.FC = () => {
 
     return (
         <div>
-            <Header />
+            <Header/>
             <div style={{display: 'flex', flexDirection: 'row', padding: '16px'}}>
                 <div style={{flex: 1}}><h3>Blocks</h3><BlocksColumn/></div>
-                <div style={{flex: 1}}><BlobQueue/></div>
-                <div style={{flex: 1}}>
+                <div style={{flex: 1}}><h3>Blobs</h3><BlobQueue/></div>
+                <div style={{flex: 1}}><h3>Leaderboard</h3>
                     <Leaderboard/>
                 </div>
             </div>
+            <Footer/>
         </div>
     );
 };

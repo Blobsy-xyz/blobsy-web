@@ -21,7 +21,7 @@ const MegaBlobBar: React.FC<MegaBlobBarProps> = ({megaBlob}) => {
     // Unused percentage is the remainder to reach 100%
     const unusedFill = 100 - usedFill;
     const isMegablob = megaBlob.segments.length > 1;
-    
+
     return (
         <div className={`mega-blob-bar ${isMegablob ? 'mega-blob-megablob' : ''}`}
              title={`${megaBlob.name} (${megaBlob.filled}%)`}>
