@@ -13,6 +13,7 @@
 
 .leaderboard-table th {
     background-color: #1E1E1E;
+    font-size: 80%;
 }
 
 @keyframes flash {
@@ -34,4 +35,10 @@
     border-radius: 4px;
     margin-bottom: 8px;
     color: #fff;
+}
+
+.totals-panel div {
+    font-size: 80%;
+    font-weight: bold;
+    margin-bottom: 4px;
 }

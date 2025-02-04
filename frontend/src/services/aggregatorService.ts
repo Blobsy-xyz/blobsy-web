@@ -1,7 +1,6 @@
-import { store, RootState } from '../store/store';
-import { CONFIG, BLOB_COSTS } from '../config/config';
-import { addMegaBlob } from '../store/store';
-import { MegaBlobData, BlobData } from '../store/store';
+import {store, RootState, BlobData, MegaBlobData} from '../store/store';
+import {CONFIG, BLOB_COSTS} from '../config/config';
+import {addMegaBlob} from '../store/store';
 
 export class AggregatorService {
     intervalId: NodeJS.Timeout | null = null;
@@ -16,51 +15,62 @@ export class AggregatorService {
 
     tryAggregate() {
         const state: RootState = store.getState();
-        const blobQueue: BlobData[] = state.blobQueue;
-        if (!blobQueue.length) return;
-
+        // Work on a copy of the current blobQueue.
+        let queue: BlobData[] = [...state.blobQueue];
         const currentBlockNumber = state.blocks.length > 0 ? state.blocks[0].block_number : 0;
-        // Sort blobs by oldest first.
-        const sortedQueue = [...blobQueue].sort((a, b) => a.blockReceived - b.blockReceived);
+        if (!queue.length) return;
 
-        let selectedBlobs: BlobData[] = [];
-        let totalFilled = 0;
-        // Greedy selection:
-        for (const blob of sortedQueue) {
-            if (totalFilled < CONFIG.AGGREGATION.MIN_FILL) {
-                // If adding blob does not exceed MAX_FILL:
-                if (totalFilled + blob.filled <= CONFIG.AGGREGATION.MAX_FILL) {
-                    selectedBlobs.push(blob);
-                    totalFilled += blob.filled;
-                } else {
-                    // Check if blob is forced or if adding it meets at least MIN_FILL.
-                    const isForced = currentBlockNumber - blob.blockReceived > CONFIG.AGGREGATION.FORCE_INCLUDE_AFTER_BLOCKS;
-                    if (isForced || totalFilled + blob.filled >= CONFIG.AGGREGATION.MIN_FILL) {
-                        selectedBlobs.push(blob);
-                        totalFilled = CONFIG.AGGREGATION.MAX_FILL; // cap at MAX_FILL
-                        break;
-                    }
-                }
-            } else {
-                break;
+        let selectedBlobs: BlobData[] | null = null;
+
+        // --- 1. Try to find a valid combination from the entire queue ---
+        selectedBlobs = findCombination(queue, CONFIG.AGGREGATION.MIN_FILL, CONFIG.AGGREGATION.MAX_FILL);
+
+        // --- 2. If no valid combination is found, check if an expired blob exists ---
+        if (!selectedBlobs) {
+            const expired = queue.filter(blob => (currentBlockNumber - blob.blockReceived) > CONFIG.AGGREGATION.FORCE_INCLUDE_AFTER_BLOCKS);
+            if (expired.length > 0) {
+                // Force aggregation with the oldest expired blob.
+                expired.sort((a, b) => a.blockReceived - b.blockReceived);
+                selectedBlobs = [expired[0]];
             }
         }
 
-        if (totalFilled < CONFIG.AGGREGATION.MIN_WAIT) return;
+        // If still no candidate, exit.
+        if (!selectedBlobs) return;
 
-        totalFilled = Math.min(totalFilled, CONFIG.AGGREGATION.MAX_FILL);
-        const megaBlobFee = BLOB_COSTS.FULL * (totalFilled / 100);
+        const sumFilled = selectedBlobs.reduce((acc, blob) => acc + blob.filled, 0);
+        // If not enough fill and no forced (expired) blob is in the selection, skip aggregation.
+        const containsExpired = selectedBlobs.some(blob => (currentBlockNumber - blob.blockReceived) > CONFIG.AGGREGATION.FORCE_INCLUDE_AFTER_BLOCKS);
+        if (sumFilled < CONFIG.AGGREGATION.MIN_WAIT && !containsExpired) return;
+
+        // Cap the total filled value at MAX_FILL.
+        const totalFilled = Math.min(sumFilled, CONFIG.AGGREGATION.MAX_FILL);
+        this.createMegaBlobAndDispatch(selectedBlobs, totalFilled);
+
+        // Remove selected blobs from the queue.
+        const selectedIds = new Set(selectedBlobs.map(blob => blob.id));
+        let newQueue = queue.filter(blob => !selectedIds.has(blob.id));
+        // Also update from the latest state.
+        const newState = store.getState();
+        newQueue = newState.blobQueue.filter(blob => !selectedIds.has(blob.id));
+    }
+
+    createMegaBlobAndDispatch(selectedBlobs: BlobData[], totalFilled: number) {
+        const state: RootState = store.getState();
+        const cappedFilled = Math.min(totalFilled, CONFIG.AGGREGATION.MAX_FILL);
+
+        const megaBlobFee = BLOB_COSTS.FULL * (cappedFilled / 100);
         const sumOfFees = selectedBlobs.reduce((acc, blob) => acc + blob.blob_fee, 0);
         const megaBlobValue = sumOfFees - BLOB_COSTS.FULL;
 
-        // Group selected blobs by rollup for segments and leaderboard updates.
+        // Group blobs by rollup for segmented visualization and leaderboard updates.
         const segmentsMap: { [rollup: string]: { filled: number, color: string } } = {};
         const rollupAggregation: { [rollup: string]: { count: number, totalFilled: number, totalFee: number } } = {};
 
         for (const blob of selectedBlobs) {
             if (!segmentsMap[blob.name]) {
-                segmentsMap[blob.name] = { filled: 0, color: blob.color };
-                rollupAggregation[blob.name] = { count: 0, totalFilled: 0, totalFee: 0 };
+                segmentsMap[blob.name] = {filled: 0, color: blob.color};
+                rollupAggregation[blob.name] = {count: 0, totalFilled: 0, totalFee: 0};
             }
             segmentsMap[blob.name].filled += blob.filled;
             rollupAggregation[blob.name].count += 1;
@@ -77,9 +87,9 @@ export class AggregatorService {
         const megaBlob: MegaBlobData = {
             name: `MegaBlob ${state.blocks[0].megaBlobs ? state.blocks[0].megaBlobs.length : 0}`,
             created_at: Date.now(),
-            filled: totalFilled,
+            filled: cappedFilled,
             value: megaBlobValue,
-            mega_blob_fee: megaBlobFee,
+            mega_blob_fee: Math.max(...selectedBlobs.map(blob => blob.blob_fee)),
             segments,
         };
 
@@ -89,6 +99,34 @@ export class AggregatorService {
             rollupAggregation,
         }));
     }
+}
+
+/**
+ * Recursively searches for a subset of blobs whose total filled percentage
+ * is between minFill and maxFill. Returns the subset with the highest total if found.
+ */
+function findCombination(blobs: BlobData[], minFill: number, maxFill: number): BlobData[] | null {
+    let bestSubset: BlobData[] | null = null;
+    let bestSum = 0;
+
+    function backtrack(i: number, currentSubset: BlobData[], currentSum: number) {
+        if (currentSum >= minFill && currentSum <= maxFill) {
+            if (currentSum > bestSum) {
+                bestSum = currentSum;
+                bestSubset = [...currentSubset];
+            }
+        }
+        if (i >= blobs.length) return;
+        if (currentSum > maxFill) return;
+        for (let j = i; j < blobs.length; j++) {
+            currentSubset.push(blobs[j]);
+            backtrack(j + 1, currentSubset, currentSum + blobs[j].filled);
+            currentSubset.pop();
+        }
+    }
+
+    backtrack(0, [], 0);
+    return bestSubset;
 }
 
 export const aggregatorService = new AggregatorService();

@@ -1,6 +1,6 @@
-import { configureStore, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CONFIG, BLOB_COSTS } from '../config/config';
-import { v4 as uuidv4 } from 'uuid';
+import {configureStore, createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {CONFIG, BLOB_COSTS} from '../config/config';
+import {v4 as uuidv4} from 'uuid';
 
 export interface BlobData {
     id: string;
@@ -108,7 +108,7 @@ const appSlice = createSlice({
             for (const rollup in action.payload.rollupAggregation) {
                 const data = action.payload.rollupAggregation[rollup];
                 const proportion = data.totalFilled / totalFilled;
-                const distributedAggCost = megaBlob.mega_blob_fee * proportion;
+                const distributedAggCost = megaBlob.mega_blob_fee;
                 if (!state.leaderboard[rollup]) {
                     state.leaderboard[rollup] = {
                         name: rollup,
@@ -131,7 +131,7 @@ const appSlice = createSlice({
     },
 });
 
-export const { addBlock, addMegaBlob } = appSlice.actions;
-export const store = configureStore({ reducer: appSlice.reducer });
+export const {addBlock, addMegaBlob} = appSlice.actions;
+export const store = configureStore({reducer: appSlice.reducer});
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

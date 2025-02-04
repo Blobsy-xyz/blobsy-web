@@ -1,18 +1,27 @@
 .block-card {
-    margin: 8px;
+    margin-right: 8px;
+    margin-left: 8px;
+    margin-bottom: 8px;
     padding: 16px;
     background-color: #1E1E1E;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border: 1px solid #444444;
 }
 
 .block-card-header {
     display: flex;
     justify-content: space-between;
+    background-color: #ffffff;
+    padding: 3px;
+    margin-bottom: 8px;
+    border-radius: 3px;
+    color: #1E1E1E;
 }
 
 .original-blobs-row {
     margin-top: 8px;
+    margin-bottom: 8px;
     display: flex;
     align-items: flex-end;
     height: 100px;
