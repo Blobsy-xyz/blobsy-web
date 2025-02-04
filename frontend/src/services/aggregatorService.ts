@@ -1,3 +1,5 @@
+// src/services/aggregatorService.ts
+
 import {store, RootState, BlobData, MegaBlobData} from '../store/store';
 import {CONFIG, BLOB_COSTS} from '../config/config';
 import {addMegaBlob} from '../store/store';
@@ -13,57 +15,75 @@ export class AggregatorService {
         if (this.intervalId) clearInterval(this.intervalId);
     }
 
+    /**
+     * Main aggregation loop.
+     *  - Takes a copy of the blob queue sorted by age (oldest first).
+     *  - Iterates through each blob; for each, starts a candidate megablob.
+     *    * If the blob is expired, it is added immediately and then we try to fill the candidate.
+     *    * If not expired, we add it and then fill.
+     *  - If the candidate (after filling) reaches at least MIN_WAIT,
+     *    we dispatch it and remove those blobs from state.
+     *  - Otherwise, we do not dispatch and leave the candidate intact.
+     */
     tryAggregate() {
         const state: RootState = store.getState();
-        // Work on a copy of the current blobQueue.
-        let queue: BlobData[] = [...state.blobQueue];
+        // Make a copy of the blobQueue sorted by age (oldest first)
+        let queue: BlobData[] = [...state.blobQueue].sort((a, b) => a.blockReceived - b.blockReceived);
+        if (queue.length === 0) return;
         const currentBlockNumber = state.blocks.length > 0 ? state.blocks[0].block_number : 0;
-        if (!queue.length) return;
 
-        let selectedBlobs: BlobData[] | null = null;
+        // Iterate through the queue (by age)
+        for (let i = 0; i < queue.length; i++) {
+            const blob = queue[i];
+            // Start candidate with this blob
+            let candidate: BlobData[] = [blob];
 
-        // --- 1. Try to find a valid combination from the entire queue ---
-        selectedBlobs = findCombination(queue, CONFIG.AGGREGATION.MIN_FILL, CONFIG.AGGREGATION.MAX_FILL);
+            // Create a candidate pool that excludes the already selected blob.
+            let candidatePool = queue.filter(b => b.id !== blob.id);
 
-        // --- 2. If no valid combination is found, check if an expired blob exists ---
-        if (!selectedBlobs) {
-            const expired = queue.filter(blob => (currentBlockNumber - blob.blockReceived) > CONFIG.AGGREGATION.FORCE_INCLUDE_AFTER_BLOCKS);
-            if (expired.length > 0) {
-                // Force aggregation with the oldest expired blob.
-                expired.sort((a, b) => a.blockReceived - b.blockReceived);
-                selectedBlobs = [expired[0]];
+            // Recursively try to fill candidate up to MAX_FILL.
+            candidate = bruteForceFiller(candidate, candidatePool);
+
+            // Compute candidate total fill
+            const candidateFill = candidate.reduce((sum, b) => sum + b.filled, 0);
+
+            // Check if blob is expired.
+            const isExpired = (currentBlockNumber - blob.blockReceived) > CONFIG.AGGREGATION.FORCE_INCLUDE_AFTER_BLOCKS;
+
+            if (isExpired) {
+                // For expired blobs: dispatch candidate regardless of MIN_WAIT.
+                this.createMegaBlobAndDispatch(candidate, Math.min(candidateFill, CONFIG.AGGREGATION.MAX_FILL));
+                // Remove candidate blobs from the queue.
+                this.removeBlobsFromQueue(candidate);
+                // Break out to restart aggregation (state changed).
+                return;
+            } else {
+                // For non-expired: dispatch candidate only if it reaches MIN_WAIT.
+                if (candidateFill >= CONFIG.AGGREGATION.MIN_WAIT) {
+                    this.createMegaBlobAndDispatch(candidate, Math.min(candidateFill, CONFIG.AGGREGATION.MAX_FILL));
+                    this.removeBlobsFromQueue(candidate);
+                    return;
+                }
+                // Otherwise, candidate does not meet threshold.
+                // Do not remove candidate blobs; they remain in queue.
+                // Continue iterating to try with next blob.
             }
         }
-
-        // If still no candidate, exit.
-        if (!selectedBlobs) return;
-
-        const sumFilled = selectedBlobs.reduce((acc, blob) => acc + blob.filled, 0);
-        // If not enough fill and no forced (expired) blob is in the selection, skip aggregation.
-        const containsExpired = selectedBlobs.some(blob => (currentBlockNumber - blob.blockReceived) > CONFIG.AGGREGATION.FORCE_INCLUDE_AFTER_BLOCKS);
-        if (sumFilled < CONFIG.AGGREGATION.MIN_WAIT && !containsExpired) return;
-
-        // Cap the total filled value at MAX_FILL.
-        const totalFilled = Math.min(sumFilled, CONFIG.AGGREGATION.MAX_FILL);
-        this.createMegaBlobAndDispatch(selectedBlobs, totalFilled);
-
-        // Remove selected blobs from the queue.
-        const selectedIds = new Set(selectedBlobs.map(blob => blob.id));
-        let newQueue = queue.filter(blob => !selectedIds.has(blob.id));
-        // Also update from the latest state.
-        const newState = store.getState();
-        newQueue = newState.blobQueue.filter(blob => !selectedIds.has(blob.id));
+        // If no candidate met the threshold, do nothing this cycle.
     }
 
+    /**
+     * Creates the MegaBlob from the candidate blobs and dispatches the addMegaBlob action.
+     * Also groups blobs by rollup for leaderboard updates.
+     */
     createMegaBlobAndDispatch(selectedBlobs: BlobData[], totalFilled: number) {
         const state: RootState = store.getState();
         const cappedFilled = Math.min(totalFilled, CONFIG.AGGREGATION.MAX_FILL);
-
         const megaBlobFee = BLOB_COSTS.FULL * (cappedFilled / 100);
         const sumOfFees = selectedBlobs.reduce((acc, blob) => acc + blob.blob_fee, 0);
         const megaBlobValue = sumOfFees - BLOB_COSTS.FULL;
 
-        // Group blobs by rollup for segmented visualization and leaderboard updates.
+        // Group blobs by rollup for visualization and leaderboard updates.
         const segmentsMap: { [rollup: string]: { filled: number, color: string } } = {};
         const rollupAggregation: { [rollup: string]: { count: number, totalFilled: number, totalFee: number } } = {};
 
@@ -89,7 +109,7 @@ export class AggregatorService {
             created_at: Date.now(),
             filled: cappedFilled,
             value: megaBlobValue,
-            mega_blob_fee: Math.max(...selectedBlobs.map(blob => blob.blob_fee)),
+            mega_blob_fee: megaBlobFee,
             segments,
         };
 
@@ -99,34 +119,58 @@ export class AggregatorService {
             rollupAggregation,
         }));
     }
+
+    /**
+     * Removes the selected blobs from the state queue.
+     * Assumes that the dispatched addMegaBlob action already updates the state.
+     */
+    removeBlobsFromQueue(selected: BlobData[]) {
+        const selectedIds = new Set(selected.map(b => b.id));
+        // In our reducer for addMegaBlob, we filter out these blobs.
+        // This helper is here for clarity.
+        // (Alternatively, dispatch a dedicated removeBlobs action.)
+    }
 }
 
 /**
- * Recursively searches for a subset of blobs whose total filled percentage
- * is between minFill and maxFill. Returns the subset with the highest total if found.
+ * Recursive brute-force filler.
+ * Given a candidate array and a pool of candidate blobs (ordered by size descending),
+ * add blobs that fit into the remaining space (up to MAX_FILL).
+ * Avoid adding the same blob twice.
  */
-function findCombination(blobs: BlobData[], minFill: number, maxFill: number): BlobData[] | null {
-    let bestSubset: BlobData[] | null = null;
-    let bestSum = 0;
+function bruteForceFiller(candidate: BlobData[], pool: BlobData[]): BlobData[] {
+    // Compute current candidate fill and remaining space.
+    let currentFill = candidate.reduce((sum, b) => sum + b.filled, 0);
+    let remaining = CONFIG.AGGREGATION.MAX_FILL - currentFill;
+    if (remaining <= 0) return candidate;
 
-    function backtrack(i: number, currentSubset: BlobData[], currentSum: number) {
-        if (currentSum >= minFill && currentSum <= maxFill) {
-            if (currentSum > bestSum) {
-                bestSum = currentSum;
-                bestSubset = [...currentSubset];
+    // Order the pool by blob size descending.
+    const sortedPool = [...pool].sort((a, b) => b.filled - a.filled);
+
+    for (let i = 0; i < sortedPool.length; i++) {
+        const blob = sortedPool[i];
+        // Skip if already in candidate (should not happen if pool is built correctly)
+        if (candidate.find(b => b.id === blob.id)) continue;
+        // If the blob fits into the remaining space, add it.
+        if (blob.filled <= remaining) {
+            const newCandidate = [...candidate, blob];
+            // Build a new pool without this blob.
+            const newPool = sortedPool.filter(b => b.id !== blob.id);
+            // Recursively attempt to fill further.
+            const filledCandidate = bruteForceFiller(newCandidate, newPool);
+            // Recalculate fill.
+            const newFill = filledCandidate.reduce((sum, b) => sum + b.filled, 0);
+            // Update candidate if the new fill is higher.
+            if (newFill > currentFill) {
+                candidate = filledCandidate;
+                currentFill = newFill;
+                remaining = CONFIG.AGGREGATION.MAX_FILL - currentFill;
+                // If candidate is full, break early.
+                if (remaining <= 0) break;
             }
         }
-        if (i >= blobs.length) return;
-        if (currentSum > maxFill) return;
-        for (let j = i; j < blobs.length; j++) {
-            currentSubset.push(blobs[j]);
-            backtrack(j + 1, currentSubset, currentSum + blobs[j].filled);
-            currentSubset.pop();
-        }
     }
-
-    backtrack(0, [], 0);
-    return bestSubset;
+    return candidate;
 }
 
 export const aggregatorService = new AggregatorService();
