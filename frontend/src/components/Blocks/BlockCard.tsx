@@ -19,16 +19,20 @@ const BlockCard: React.FC<BlockCardProps> = ({block}) => {
             {/* Original Blobs Row */}
             <div className="original-blobs-header"><small><b>Original blobs:</b></small></div>
             <div className="original-blobs-row">
-                {block.blobs.map((blob: BlobData, idx: number) => (
-                    <div
-                        key={idx}
-                        className="blob-bar"
-                        style={{background: blob.color, height: `${blob.filled}%`}}
-                        title={`Sender: ${blob.name}: ${blob.filled}%, Fee: ${blob.blob_fee} gwei`}
-                    >
-                        <div><small>{blob.filled}%</small></div>
-                    </div>
-                ))}
+                {block.blobs && block.blobs.length > 0 ? (
+                    block.blobs.map((blob: BlobData, idx: number) => (
+                        <div
+                            key={idx}
+                            className="blob-bar"
+                            style={{background: blob.color, height: `${blob.filled}%`}}
+                            title={`Sender: ${blob.name}: ${blob.filled}%, Fee: ${blob.blob_fee} gwei`}
+                        >
+                            <div><small>{blob.filled}%</small></div>
+                        </div>
+                    ))
+                ) : (
+                    <small className="waiting">No blobs in this block</small>
+                )}
             </div>
 
             {/* Mega Blobs Row */}
@@ -41,7 +45,7 @@ const BlockCard: React.FC<BlockCardProps> = ({block}) => {
                         </div>
                     ))
                 ) : (
-                    <span>...</span>
+                    <small className="waiting">No blobs (or to small) to aggregate ... </small>
                 )}
             </div>
         </div>

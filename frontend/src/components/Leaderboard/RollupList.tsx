@@ -7,7 +7,7 @@ import '../../styles/leaderboard.css';
 const RollupList: React.FC = () => {
     const leaderboardObj = useSelector((state: RootState) => state.leaderboard);
     const rollups: LeaderboardEntry[] = Object.values(leaderboardObj)
-        .sort((a, b) => b.noOfAggBlobs - a.noOfAggBlobs);
+        .sort((a, b) => b.savings - a.savings);
 
     return (
         <table className="leaderboard-table">
@@ -15,10 +15,9 @@ const RollupList: React.FC = () => {
             <tr>
                 <th>Sender</th>
                 <th>Cost</th>
-                <th>Agg Cost</th>
                 <th>Savings</th>
                 <th>Blobs</th>
-                <th>Agg Blobs</th>
+                <th>MegaBlobs</th>
             </tr>
             </thead>
             <tbody>

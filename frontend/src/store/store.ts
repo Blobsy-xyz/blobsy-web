@@ -36,7 +36,6 @@ export interface Block {
 export interface LeaderboardEntry {
     name: string;
     cost: number;       // Sum of original blob fees
-    aggCost: number;    // Aggregated fee sum from MegaBlobs
     savings: number;    // cost - aggCost
     noOfBlobs: number;  // Total number of blobs submitted
     noOfAggBlobs: number; // Count of blobs aggregated (only if >=2 blobs in a MegaBlob)
@@ -79,7 +78,6 @@ const appSlice = createSlice({
                     state.leaderboard[blob.name] = {
                         name: blob.name,
                         cost: 0,
-                        aggCost: 0,
                         savings: 0,
                         noOfBlobs: 0,
                         noOfAggBlobs: 0,
@@ -88,7 +86,6 @@ const appSlice = createSlice({
                 }
                 state.leaderboard[blob.name].cost += blob.blob_fee;
                 state.leaderboard[blob.name].noOfBlobs += 1;
-                state.leaderboard[blob.name].savings = state.leaderboard[blob.name].cost - state.leaderboard[blob.name].aggCost;
             });
         },
         addMegaBlob(state, action: PayloadAction<{
@@ -116,7 +113,7 @@ const appSlice = createSlice({
                 const data = action.payload.rollupAggregation[rollup];
 
 
-                const proportion = !isAggregated ? 1 : data.totalFilled / CONFIG.AGGREGATION.MAX_FILL / 100;
+                const proportion = !isAggregated ? 1 : data.totalFilled / CONFIG.AGGREGATION.MAX_FILL;
                 const distributedAggCost = megaBlob.mega_blob_fee * proportion;
                 console.log(`totalFilled: ${totalFilled}, blob.totalFilled: ${data.totalFilled}`);
                 console.log(`proportion: ${proportion}, distributedAggCost: ${distributedAggCost}`);
@@ -124,19 +121,18 @@ const appSlice = createSlice({
                     state.leaderboard[rollup] = {
                         name: rollup,
                         cost: 0,
-                        aggCost: 0,
                         savings: 0,
                         noOfBlobs: 0,
                         noOfAggBlobs: 0,
                         color: '',
                     };
                 }
-                state.leaderboard[rollup].aggCost += distributedAggCost;
                 // Update agg blob count only if 2+ blobs from that rollup were aggregated.
                 if (isAggregated) {
                     state.leaderboard[rollup].noOfAggBlobs += 1;
+//                    state.leaderboard[rollup].noOfBlobs -= 1;
+                    state.leaderboard[rollup].savings += megaBlob.mega_blob_fee - distributedAggCost;
                 }
-                state.leaderboard[rollup].savings = state.leaderboard[rollup].cost - state.leaderboard[rollup].aggCost;
             }
         },
     },

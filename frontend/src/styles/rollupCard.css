@@ -25,3 +25,7 @@
     border: 1px solid #333;
     text-align: center;
 }
+
+.leaderboard-table td {
+    font-size: 90%;
+}
