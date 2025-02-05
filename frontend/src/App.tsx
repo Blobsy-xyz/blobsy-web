@@ -22,7 +22,7 @@ const App: React.FC = () => {
             <Header/>
             <div style={{display: 'flex', flexDirection: 'row', padding: '16px'}}>
                 <div style={{flex: 1}}><h3>Blocks</h3><BlocksColumn/></div>
-                <div style={{flex: 1}}><h3>Blobs</h3><BlobQueue/></div>
+                <div style={{flex: 1}}><h3>Blob queue</h3><BlobQueue/></div>
                 <div style={{flex: 1}}><h3>Leaderboard</h3>
                     <Leaderboard/>
                 </div>

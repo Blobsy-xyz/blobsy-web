@@ -13,11 +13,23 @@ const Footer: React.FC = () => {
                 color: "#ccc",
                 height: "20px",
                 padding: "10px 10px",
-                textAlign: "left",
+                textAlign: "center",
                 borderTop: "1px solid #ccc",
             }}
         >
-            <small>Blobsy © {new Date().getFullYear()} Kriptal. All rights reserved.</small>
+            <small>
+                © {new Date().getFullYear()} <a href=">https://kriptal.io">Kriptal</a> All rights reserved.&nbsp;
+                <a
+                    href="#"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        window.location.href =
+                            `mailto:` + `${"info"}@${"kriptal"}.${"io"}`;
+                    }}
+                >
+                    info@kriptal.io
+                </a>
+            </small>
         </footer>
     );
 };

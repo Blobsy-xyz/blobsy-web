@@ -26,7 +26,7 @@
 }
 
 .flash {
-    animation: flash 1s ease-out;
+    animation: flash 300ms ease-out;
 }
 
 .totals-panel {
@@ -37,9 +37,11 @@
     margin-bottom: 8px;
     color: #fff;
 }
+
 .totals-panel table {
     width: 100%;
 }
+
 .totals-panel td:nth-child(2) {
     text-align: right;
 }

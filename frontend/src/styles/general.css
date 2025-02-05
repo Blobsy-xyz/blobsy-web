@@ -1,3 +1,7 @@
 .waiting {
     color: orange;
 }
+
+footer a {
+    color: gray;
+}

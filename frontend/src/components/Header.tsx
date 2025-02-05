@@ -40,7 +40,7 @@ const Header: React.FC = () => {
                         position: 'absolute',
                         top: '30px',
                         right: '0',
-                        width: '200px',
+                        width: '300px',
                         background: 'orange',
                         color: 'black',
                         padding: '10px',
@@ -49,12 +49,20 @@ const Header: React.FC = () => {
                         zIndex: 10
                     }}
                 ><small>
-                    Realtime blob aggregation.<br/>
-                    Trying to repackage existing blobs into megablobs.<br/>
+                    Realtime blob aggregation experiment.<br/>
                     Alpha means bugs.<br/><br/>
-                    Aggregation is very simple:<br/>
-                    - submit blob / megaBlob only if it is at least 85% full.<br/>
-                    - force include blob and submit after 5 blocks<br/>
+                    Currently, the aggregation algorithm is very simple:<br/>
+                    <ul>
+                        <li>Waits for a new block</li>
+                        <li>If the block contains blob(s), it puts them into the blob queue</li>
+                        <li>Processes the queue and creates a Megablob:</li>
+                    </ul>
+                    <ol>
+                        <li>If a blob is more than 85% full</li>
+                        <li>If we aggregate multiple blobs and reach more than 85%</li>
+                        <li>If a blob is in the queue for more than 5 blocks</li>
+                    </ol>
+                    <span>Successfully aggregated megablobs have a orange border</span>
                 </small>
                 </div>
             </div>
