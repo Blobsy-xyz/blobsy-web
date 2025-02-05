@@ -33,7 +33,7 @@ const MegaBlobBar: React.FC<MegaBlobBarProps> = ({megaBlob}) => {
                         width: `${segment.filled}%`,
                         backgroundColor: segment.color,
                     }}
-                    title={`${segment.rollup}: ${segment.filled}%`}
+                    title={`Sender: ${segment.rollup}: ${segment.filled}%`}
                 >
                     <span className="mega-blob-segment-label">{segment.filled}%</span>
                 </div>

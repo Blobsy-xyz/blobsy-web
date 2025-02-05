@@ -24,6 +24,7 @@ const BlockCard: React.FC<BlockCardProps> = ({block}) => {
                         key={idx}
                         className="blob-bar"
                         style={{background: blob.color, height: `${blob.filled}%`}}
+                        title={`Sender: ${blob.name}: ${blob.filled}%, Fee: ${blob.blob_fee} gwei`}
                     >
                         <div><small>{blob.filled}%</small></div>
                     </div>

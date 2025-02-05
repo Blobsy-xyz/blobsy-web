@@ -17,7 +17,7 @@ const Footer: React.FC = () => {
                 borderTop: "1px solid #ccc",
             }}
         >
-            <small>© {new Date().getFullYear()} Kriptal. All rights reserved.</small>
+            <small>Blobsy © {new Date().getFullYear()} Kriptal. All rights reserved.</small>
         </footer>
     );
 };

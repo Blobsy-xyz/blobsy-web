@@ -1,13 +1,21 @@
 import React from 'react';
-import {BlobData} from '../../store/store';
+import {BlobData, Block} from '../../store/store';
+import {RootState} from '../../store/store';
 import {motion} from 'framer-motion';
 import '../../styles/blobCard.css';
+import {useSelector} from "react-redux";
 
 interface BlobCardProps {
     blob: BlobData;
 }
 
+interface BlockCardProps {
+    block: Block;
+}
+
 const BlobCard: React.FC<BlobCardProps> = ({blob}) => {
+    const blocks = useSelector((state: RootState) => state.blocks);
+    const lastBlockNumber = blocks[0].block_number;
     return (
         <motion.div
             className="blob-card"
@@ -23,7 +31,8 @@ const BlobCard: React.FC<BlobCardProps> = ({blob}) => {
                 <div className="blob-unfilled" style={{width: `${100 - blob.filled}%`}}></div>
             </div>
             <div className="blob-info">
-                <small>Name: {blob.name}</small>
+                <small>Name: <b>{blob.name}</b>, Fee: <b>{blob.blob_fee}</b> gwei,
+                    Age: <b>{lastBlockNumber - blob.blockReceived}</b> block(s)</small>
             </div>
         </motion.div>
     );

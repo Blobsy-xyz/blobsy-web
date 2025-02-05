@@ -6,7 +6,7 @@ const Header: React.FC = () => {
         <header className="header">
             <img src="/blober-logo-small.png" alt="Blober" className="logo"/>
             <div className="brand-info">
-                <h1>Blober <sup style={{color: 'orange', fontSize: '50%'}}>alpha</sup></h1>
+                <h1>Blobsy <sup style={{color: 'orange', fontSize: '50%'}}>alpha</sup></h1>
                 <p>Inside blob aggregation</p>
             </div>
 
@@ -48,9 +48,14 @@ const Header: React.FC = () => {
                         boxShadow: '0 2px 5px rgba(0, 0, 0, 0.3)',
                         zIndex: 10
                     }}
-                >
-                    Realtime blob aggregation. Trying to repackage existing blobs into megablobs.
-                    Alpha means bugs.
+                ><small>
+                    Realtime blob aggregation.<br/>
+                    Trying to repackage existing blobs into megablobs.<br/>
+                    Alpha means bugs.<br/><br/>
+                    Aggregation is very simple:<br/>
+                    - submit blob / megaBlob only if it is at least 85% full.<br/>
+                    - force include blob and submit after 5 blocks<br/>
+                </small>
                 </div>
             </div>
         </header>

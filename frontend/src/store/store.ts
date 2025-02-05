@@ -47,12 +47,14 @@ export interface AppState {
     blocks: Block[];
     blobQueue: BlobData[];
     leaderboard: { [rollup: string]: LeaderboardEntry };
+    noOfAggBlobs: number; // New property
 }
 
 const initialState: AppState = {
     blocks: [],
     blobQueue: [],
     leaderboard: {},
+    noOfAggBlobs: 0, // Initialize the new property
 };
 
 const appSlice = createSlice({
@@ -67,7 +69,7 @@ const appSlice = createSlice({
                 blockReceived: block.block_number,
             }));
             state.blocks.unshift(block);
-            if (state.blocks.length > 5) state.blocks.pop();
+            if (state.blocks.length > 10) state.blocks.pop();
 
             state.blobQueue.push(...block.blobs);
 
@@ -104,11 +106,20 @@ const appSlice = createSlice({
                 }
             }
             const megaBlob = action.payload.megaBlob;
+
+            const isAggregated = megaBlob.segments.length > 1;
+            if (isAggregated) {
+                state.noOfAggBlobs += 1;
+            }
             const totalFilled = megaBlob.filled;
             for (const rollup in action.payload.rollupAggregation) {
                 const data = action.payload.rollupAggregation[rollup];
-                const proportion = data.totalFilled / totalFilled;
-                const distributedAggCost = megaBlob.mega_blob_fee;
+
+
+                const proportion = !isAggregated ? 1 : data.totalFilled / CONFIG.AGGREGATION.MAX_FILL / 100;
+                const distributedAggCost = megaBlob.mega_blob_fee * proportion;
+                console.log(`totalFilled: ${totalFilled}, blob.totalFilled: ${data.totalFilled}`);
+                console.log(`proportion: ${proportion}, distributedAggCost: ${distributedAggCost}`);
                 if (!state.leaderboard[rollup]) {
                     state.leaderboard[rollup] = {
                         name: rollup,
@@ -122,8 +133,8 @@ const appSlice = createSlice({
                 }
                 state.leaderboard[rollup].aggCost += distributedAggCost;
                 // Update agg blob count only if 2+ blobs from that rollup were aggregated.
-                if (data.count >= 2) {
-                    state.leaderboard[rollup].noOfAggBlobs += data.count;
+                if (isAggregated) {
+                    state.leaderboard[rollup].noOfAggBlobs += 1;
                 }
                 state.leaderboard[rollup].savings = state.leaderboard[rollup].cost - state.leaderboard[rollup].aggCost;
             }

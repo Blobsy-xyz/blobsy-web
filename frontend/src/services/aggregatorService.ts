@@ -27,6 +27,8 @@ export class AggregatorService {
      */
     tryAggregate() {
         const state: RootState = store.getState();
+
+
         // Make a copy of the blobQueue sorted by age (oldest first)
         let queue: BlobData[] = [...state.blobQueue].sort((a, b) => a.blockReceived - b.blockReceived);
         if (queue.length === 0) return;
@@ -34,6 +36,16 @@ export class AggregatorService {
 
         // Iterate through the queue (by age)
         for (let i = 0; i < queue.length; i++) {
+            // Check if state.blocks and state.blocks[0].megaBlobs are defined and ensure we do not exceed MAX_MEGA_BLOBS_PER_BLOCK.
+
+//            console.log(`!state.blocks?.[0]?.megaBlobs: ${!state.blocks?.[0]?.megaBlobs}, state.blocks[0].megaBlobs.length: ${state.blocks[0]?.megaBlobs?.length}`);
+//            console.log(`!state.blocks?.[0]?.blobs: ${!state.blocks?.[0]?.blobs}, state.blocks[0].blobs.length: ${state.blocks[0]?.blobs?.length}`);
+//            console.log(`!state.blobQueue?: ${!state.blobQueue}, state.blobQueue?.length: ${state.blobQueue?.length}`);
+
+            if (state.blocks?.[0]?.megaBlobs && state.blocks[0].megaBlobs.length >= CONFIG.AGGREGATION.MAX_MEGA_BLOBS_PER_BLOCK) {
+                return;
+            }
+
             const blob = queue[i];
             // Start candidate with this blob
             let candidate: BlobData[] = [blob];
@@ -59,7 +71,7 @@ export class AggregatorService {
                 return;
             } else {
                 // For non-expired: dispatch candidate only if it reaches MIN_WAIT.
-                if (candidateFill >= CONFIG.AGGREGATION.MIN_WAIT) {
+                if (candidateFill >= CONFIG.AGGREGATION.MIN_FILL) {
                     this.createMegaBlobAndDispatch(candidate, Math.min(candidateFill, CONFIG.AGGREGATION.MAX_FILL));
                     this.removeBlobsFromQueue(candidate);
                     return;
@@ -79,9 +91,10 @@ export class AggregatorService {
     createMegaBlobAndDispatch(selectedBlobs: BlobData[], totalFilled: number) {
         const state: RootState = store.getState();
         const cappedFilled = Math.min(totalFilled, CONFIG.AGGREGATION.MAX_FILL);
-        const megaBlobFee = BLOB_COSTS.FULL * (cappedFilled / 100);
+
+        const megaBlobFee = Math.max(...selectedBlobs.map(blob => blob.blob_fee));
         const sumOfFees = selectedBlobs.reduce((acc, blob) => acc + blob.blob_fee, 0);
-        const megaBlobValue = sumOfFees - BLOB_COSTS.FULL;
+        const megaBlobValue = sumOfFees - megaBlobFee;
 
         // Group blobs by rollup for visualization and leaderboard updates.
         const segmentsMap: { [rollup: string]: { filled: number, color: string } } = {};
