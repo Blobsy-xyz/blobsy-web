@@ -1,6 +1,7 @@
 import {configureStore, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {CONFIG, BLOB_COSTS} from '../config/config';
 import {v4 as uuidv4} from 'uuid';
+import {aggregatorService} from '../services/aggregatorService';
 
 export interface BlobData {
     id: string;
@@ -87,6 +88,10 @@ const appSlice = createSlice({
                 state.leaderboard[blob.name].cost += blob.blob_fee;
                 state.leaderboard[blob.name].noOfBlobs += 1;
             });
+            // Trigger aggregation whenever a new block is added
+            setTimeout(() => {
+                aggregatorService.tryAggregate();
+            }, 500);
         },
         addMegaBlob(state, action: PayloadAction<{
             megaBlob: MegaBlobData;
@@ -115,8 +120,8 @@ const appSlice = createSlice({
 
                 const proportion = !isAggregated ? 1 : data.totalFilled / CONFIG.AGGREGATION.MAX_FILL;
                 const distributedAggCost = megaBlob.mega_blob_fee * proportion;
-                console.log(`totalFilled: ${totalFilled}, blob.totalFilled: ${data.totalFilled}`);
-                console.log(`proportion: ${proportion}, distributedAggCost: ${distributedAggCost}`);
+//                console.log(`totalFilled: ${totalFilled}, blob.totalFilled: ${data.totalFilled}`);
+//                console.log(`proportion: ${proportion}, distributedAggCost: ${distributedAggCost}`);
                 if (!state.leaderboard[rollup]) {
                     state.leaderboard[rollup] = {
                         name: rollup,

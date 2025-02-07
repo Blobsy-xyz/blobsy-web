@@ -11,10 +11,10 @@ import Footer from "./components/Footer";
 const App: React.FC = () => {
     useEffect(() => {
         webSocketService.connect();
-        aggregatorService.start();
-        return () => {
-            aggregatorService.stop();
-        };
+//        aggregatorService.start();
+//        return () => {
+//            aggregatorService.stop();
+//        };
     }, []);
 
     return (

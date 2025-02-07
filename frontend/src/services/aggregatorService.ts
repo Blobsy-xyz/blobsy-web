@@ -8,11 +8,11 @@ export class AggregatorService {
     intervalId: NodeJS.Timeout | null = null;
 
     start() {
-        this.intervalId = setInterval(() => this.tryAggregate(), CONFIG.ANIMATION_DELAY_MS);
+//        this.intervalId = setInterval(() => this.tryAggregate(), CONFIG.ANIMATION_DELAY_MS);
     }
 
     stop() {
-        if (this.intervalId) clearInterval(this.intervalId);
+//        if (this.intervalId) clearInterval(this.intervalId);
     }
 
     /**
@@ -38,11 +38,13 @@ export class AggregatorService {
         for (let i = 0; i < queue.length; i++) {
             // Check if state.blocks and state.blocks[0].megaBlobs are defined and ensure we do not exceed MAX_MEGA_BLOBS_PER_BLOCK.
 
-//            console.log(`!state.blocks?.[0]?.megaBlobs: ${!state.blocks?.[0]?.megaBlobs}, state.blocks[0].megaBlobs.length: ${state.blocks[0]?.megaBlobs?.length}`);
-//            console.log(`!state.blocks?.[0]?.blobs: ${!state.blocks?.[0]?.blobs}, state.blocks[0].blobs.length: ${state.blocks[0]?.blobs?.length}`);
-//            console.log(`!state.blobQueue?: ${!state.blobQueue}, state.blobQueue?.length: ${state.blobQueue?.length}`);
+            console.log(`!state.blocks?.[0]?.megaBlobs: ${!state.blocks?.[0]?.megaBlobs}, state.blocks[0].megaBlobs.length: ${state.blocks[0]?.megaBlobs?.length}`);
+            console.log(`!state.blocks?.[0]?.blobs: ${!state.blocks?.[0]?.blobs}, state.blocks[0].blobs.length: ${state.blocks[0]?.blobs?.length}`);
+            console.log(`!state.blobQueue?: ${!state.blobQueue}, state.blobQueue?.length: ${state.blobQueue?.length}`);
+            console.log("Processing blob: ", queue[i]);
 
             if (state.blocks?.[0]?.megaBlobs && state.blocks[0].megaBlobs.length >= CONFIG.AGGREGATION.MAX_MEGA_BLOBS_PER_BLOCK) {
+                console.log(`Max mega blobs per block reached: ${state.blocks[0].megaBlobs.length}`);
                 return;
             }
 
@@ -68,13 +70,13 @@ export class AggregatorService {
                 // Remove candidate blobs from the queue.
                 this.removeBlobsFromQueue(candidate);
                 // Break out to restart aggregation (state changed).
-                return;
+//                return;
             } else {
                 // For non-expired: dispatch candidate only if it reaches MIN_WAIT.
                 if (candidateFill >= CONFIG.AGGREGATION.MIN_FILL) {
                     this.createMegaBlobAndDispatch(candidate, Math.min(candidateFill, CONFIG.AGGREGATION.MAX_FILL));
                     this.removeBlobsFromQueue(candidate);
-                    return;
+//                    return;
                 }
                 // Otherwise, candidate does not meet threshold.
                 // Do not remove candidate blobs; they remain in queue.
