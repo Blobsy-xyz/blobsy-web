@@ -38,10 +38,10 @@ export class AggregatorService {
         for (let i = 0; i < queue.length; i++) {
             // Check if state.blocks and state.blocks[0].megaBlobs are defined and ensure we do not exceed MAX_MEGA_BLOBS_PER_BLOCK.
 
-            console.log(`!state.blocks?.[0]?.megaBlobs: ${!state.blocks?.[0]?.megaBlobs}, state.blocks[0].megaBlobs.length: ${state.blocks[0]?.megaBlobs?.length}`);
-            console.log(`!state.blocks?.[0]?.blobs: ${!state.blocks?.[0]?.blobs}, state.blocks[0].blobs.length: ${state.blocks[0]?.blobs?.length}`);
-            console.log(`!state.blobQueue?: ${!state.blobQueue}, state.blobQueue?.length: ${state.blobQueue?.length}`);
-            console.log("Processing blob: ", queue[i]);
+            // console.log(`!state.blocks?.[0]?.megaBlobs: ${!state.blocks?.[0]?.megaBlobs}, state.blocks[0].megaBlobs.length: ${state.blocks[0]?.megaBlobs?.length}`);
+            // console.log(`!state.blocks?.[0]?.blobs: ${!state.blocks?.[0]?.blobs}, state.blocks[0].blobs.length: ${state.blocks[0]?.blobs?.length}`);
+            // console.log(`!state.blobQueue?: ${!state.blobQueue}, state.blobQueue?.length: ${state.blobQueue?.length}`);
+            // console.log("Processing blob: ", queue[i]);
 
             if (state.blocks?.[0]?.megaBlobs && state.blocks[0].megaBlobs.length >= CONFIG.AGGREGATION.MAX_MEGA_BLOBS_PER_BLOCK) {
                 console.log(`Max mega blobs per block reached: ${state.blocks[0].megaBlobs.length}`);
@@ -125,6 +125,7 @@ export class AggregatorService {
             filled: cappedFilled,
             value: megaBlobValue,
             mega_blob_fee: megaBlobFee,
+            is_aggregated: segments.length > 1,
             segments,
         };
 
@@ -141,9 +142,11 @@ export class AggregatorService {
      */
     removeBlobsFromQueue(selected: BlobData[]) {
         const selectedIds = new Set(selected.map(b => b.id));
+
         // In our reducer for addMegaBlob, we filter out these blobs.
         // This helper is here for clarity.
         // (Alternatively, dispatch a dedicated removeBlobs action.)
+
     }
 }
 
