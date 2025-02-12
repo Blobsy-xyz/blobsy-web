@@ -29,7 +29,7 @@ export class AggregatorService {
 
             if (isExpired || candidateFill >= CONFIG.AGGREGATION.MIN_FILL) {
                 this.createMegaBlobAndDispatch(candidate, Math.min(candidateFill, CONFIG.AGGREGATION.MAX_FILL));
-                this.removeBlobsFromQueue(candidate);
+//                this.removeBlobsFromQueue(candidate);
 
                 // Remove blobs from the copied queue
                 const candidateIds = new Set(candidate.map(b => b.id));
@@ -41,8 +41,10 @@ export class AggregatorService {
 
     createMegaBlobAndDispatch(selectedBlobs: BlobData[], totalFilled: number) {
         const state: RootState = store.getState();
+        const currentBlock = state.blocks[0];
         const cappedFilled = Math.min(totalFilled, CONFIG.AGGREGATION.MAX_FILL);
-        const megaBlobFee = Math.max(...selectedBlobs.map(blob => blob.blob_fee));
+        const noOfSegments = selectedBlobs.length;
+        const megaBlobFee = (currentBlock.new_tx_fee || 0) + (noOfSegments * (currentBlock.new_blob_fee || 0));
         const sumOfFees = selectedBlobs.reduce((acc, blob) => acc + blob.blob_fee, 0);
         const megaBlobValue = sumOfFees - megaBlobFee;
 
@@ -51,8 +53,8 @@ export class AggregatorService {
 
         for (const blob of selectedBlobs) {
             if (!segmentsMap[blob.name]) {
-                segmentsMap[blob.name] = {filled: 0, color: blob.color};
-                rollupAggregation[blob.name] = {count: 0, totalFilled: 0, totalFee: 0};
+                segmentsMap[blob.name] = { filled: 0, color: blob.color };
+                rollupAggregation[blob.name] = { count: 0, totalFilled: 0, totalFee: 0 };
             }
             segmentsMap[blob.name].filled += blob.filled;
             rollupAggregation[blob.name].count += 1;
@@ -60,14 +62,21 @@ export class AggregatorService {
             rollupAggregation[blob.name].totalFee += blob.blob_fee;
         }
 
-        const segments = Object.keys(segmentsMap).map(rollup => ({
-            rollup,
-            filled: segmentsMap[rollup].filled,
-            color: segmentsMap[rollup].color,
-        }));
+        const segments = Object.keys(segmentsMap).map(rollup => {
+            const filled = segmentsMap[rollup].filled;
+            const spaceSaved = noOfSegments > 1 ? (100 - filled) * 128 - (100 - cappedFilled) * 128 : 0;
+            const blobFee = megaBlobFee * (filled / 100);
+            return {
+                rollup,
+                filled,
+                color: segmentsMap[rollup].color,
+                space_saved: spaceSaved,
+                blob_fee: blobFee,
+            };
+        });
 
         const megaBlob: MegaBlobData = {
-            name: `MegaBlob ${state.blocks[0].megaBlobs ? state.blocks[0].megaBlobs.length : 0}`,
+            name: `MegaBlob ${currentBlock.megaBlobs ? currentBlock.megaBlobs.length : 0}`,
             created_at: Date.now(),
             filled: cappedFilled,
             value: megaBlobValue,
@@ -81,11 +90,6 @@ export class AggregatorService {
             selectedBlobIds: selectedBlobs.map(b => b.id),
             rollupAggregation,
         }));
-    }
-
-    removeBlobsFromQueue(selected: BlobData[]) {
-        const selectedIds = new Set(selected.map(b => b.id));
-//        store.dispatch(removeBlobs(Array.from(selectedIds)));
     }
 }
 

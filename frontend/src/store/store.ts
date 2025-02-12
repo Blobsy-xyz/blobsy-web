@@ -1,4 +1,4 @@
-import {configureStore, createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {configureStore, createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {CONFIG} from '../config/config';
 import {v4 as uuidv4} from 'uuid';
 import {aggregatorService} from '../services/aggregatorService';
@@ -24,6 +24,8 @@ export interface MegaBlobData {
     segments: {
         rollup: string;
         filled: number;
+        blob_fee: number
+        space_saved: number;
         color: string;
     }[];
 }
@@ -41,9 +43,9 @@ export interface LeaderboardEntry {
     name: string;
     cost: number;       // Sum of original blob fees
     aggCost: number;       // Sum of original blob fees
-    savings: number;    // cost - aggCost
-    freeSpace: number;
+    aggBlobs: number;
     usedSpace: number;
+    spaceSaved: number;
     color: string;
 }
 
@@ -66,6 +68,51 @@ const initialState: AppState = {
     blobs: [],
     aggBlobs: [],
 };
+
+const updateLeaderboardWithAggregatedBlobs = createAsyncThunk(
+    'app/updateLeaderboardWithAggregatedBlobs',
+    async (_, {getState}) => {
+        const state = getState() as RootState;
+        const block = state.blocks[0];
+        const new_tx_fee = block.new_tx_fee || 0;
+        const new_blob_fee = block.new_blob_fee || 0;
+
+        if (block.megaBlobs && block.megaBlobs.length > 0) {
+            const noOfMegaBlobs = block.megaBlobs.length;
+
+            const updatedMegaBlobs = block.megaBlobs.map(megaBlob => {
+                const updatedSegments = megaBlob.segments.map(segment => {
+                    const blob_fee = new_blob_fee * (segment.filled / 100) + (new_tx_fee / noOfMegaBlobs);
+                    return {...segment, blob_fee};
+                });
+                return {...megaBlob, segments: updatedSegments};
+            });
+            updatedMegaBlobs.forEach(megaBlob => {
+                const isAggregated = megaBlob.segments.length > 1;
+                megaBlob.segments.forEach(segment => {
+                    const rollup = segment.rollup;
+                    if (!state.leaderboard[rollup]) {
+                        state.leaderboard[rollup] = {
+                            name: rollup,
+                            cost: 0,
+                            aggCost: 0,
+                            aggBlobs: 0,
+                            spaceSaved: 0,
+                            usedSpace: 0,
+                            color: segment.color,
+                        };
+                    }
+                    state.leaderboard[rollup].aggCost += segment.blob_fee;
+                    state.leaderboard[rollup].spaceSaved += segment.space_saved;
+                    state.leaderboard[rollup].aggBlobs += isAggregated ? 1 : 0;
+                });
+            });
+
+            // Update the state with the new megaBlobs
+            state.blocks[0] = {...block, megaBlobs: updatedMegaBlobs};
+        }
+    }
+);
 
 const appSlice = createSlice({
     name: 'app',
@@ -90,49 +137,24 @@ const appSlice = createSlice({
                         name: blob.name,
                         cost: 0,
                         aggCost: 0,
-                        savings: 0,
-                        freeSpace: 0,
+                        aggBlobs: 0,
+                        spaceSaved: 0,
                         usedSpace: 0,
                         color: blob.color,
                     };
                 }
                 state.leaderboard[blob.name].cost += blob.blob_fee;
-                state.leaderboard[blob.name].freeSpace += 128 * (100 - blob.filled) / 100;
+                state.leaderboard[blob.name].spaceSaved += 128 * (100 - blob.filled) / 100;
                 state.leaderboard[blob.name].usedSpace += 128 * blob.filled / 100;
                 state.blobs.push(blob);
             });
+
             // Trigger aggregation whenever a new block is added
             setTimeout(() => {
                 aggregatorService.tryAggregate();
-            }, 500);
 
-            const new_tx_fee = block.new_tx_fee ? block.new_tx_fee : 0
-            const new_blob_fee = block.new_blob_fee ? block.new_blob_fee : 0
-            // Update leaderboard with aggregated blobs data from this block
-            if (block.megaBlobs) {
-                const noOfMegaBlobs = block.megaBlobs.length
-                block.megaBlobs.forEach(megaBlob => {
-                    const isAggregated = megaBlob.segments.length > 1;
-                    for (const segment of megaBlob.segments) {
-                        const rollup = segment.rollup;
-                        if (!state.leaderboard[rollup]) {
-                            state.leaderboard[rollup] = {
-                                name: rollup,
-                                cost: 0,
-                                aggCost: 0,
-                                savings: 0,
-                                freeSpace: 0,
-                                usedSpace: 0,
-                                color: segment.color,
-                            };
-                        }
-                        // TODO: Socialize blob empty space costs
-                        const blobFilled = segment.filled;
-                        const blobFee = (new_tx_fee / noOfMegaBlobs) + new_blob_fee * (isAggregated ? blobFilled / 100 : 1);
-                        state.leaderboard[rollup].aggCost += blobFee;
-                    }
-                });
-            }
+                store.dispatch(updateLeaderboardWithAggregatedBlobs());
+            }, 500);
         },
         addMegaBlob(state, action: PayloadAction<{
             megaBlob: MegaBlobData;
@@ -152,35 +174,21 @@ const appSlice = createSlice({
             const megaBlob = action.payload.megaBlob;
             megaBlob.is_aggregated = megaBlob.segments.length > 1;
             state.aggBlobs.push(megaBlob);
-
-            // const totalFilled = megaBlob.filled;
-            // for (const rollup in action.payload.rollupAggregation) {
-            //     const data = action.payload.rollupAggregation[rollup];
-            //
-            //     const proportion = !isAggregated ? 1 : data.totalFilled / CONFIG.AGGREGATION.MAX_FILL;
-            //     const distributedAggCost = megaBlob.mega_blob_fee * proportion;
-            //     if (!state.leaderboard[rollup]) {
-            //         state.leaderboard[rollup] = {
-            //             name: rollup,
-            //             cost: 0,
-            //             aggCost: 0,
-            //             savings: 0,
-            //             freeSpace: 0,
-            //             usedSpace: 0,
-            //             color: '',
-            //
-            //         };
-            //     }
-            //     // Update agg blob count only if 2+ blobs from that rollup were aggregated.
-            //     if (isAggregated) {
-            //         state.leaderboard[rollup].savings += megaBlob.mega_blob_fee - distributedAggCost;
-            //     }
-            // }
+        },
+        removeBlobs(state, action: PayloadAction<string[]>) {
+            const selectedIds = new Set(action.payload);
+            state.blobQueue = state.blobQueue.filter(blob => !selectedIds.has(blob.id));
         },
     },
+    extraReducers: (builder) => {
+        builder.addCase(updateLeaderboardWithAggregatedBlobs.fulfilled, (state, action) => {
+            // handle the fulfilled state if needed
+        });
+    }
 });
 
-export const {addBlock, addMegaBlob} = appSlice.actions;
+export const {addBlock, addMegaBlob, removeBlobs} = appSlice.actions;
 export const store = configureStore({reducer: appSlice.reducer});
+export {updateLeaderboardWithAggregatedBlobs};
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

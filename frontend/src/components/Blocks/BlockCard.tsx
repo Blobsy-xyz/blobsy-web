@@ -37,7 +37,7 @@ const BlockCard: React.FC<BlockCardProps> = ({block}) => {
 
             {/* Mega Blobs Row */}
             <div className="mega-blobs-row">
-                <div className="mega-blobs-header"><small><b>Mega blobs:</b></small></div>
+                <div className="mega-blobs-header"><small><b>Agg blobs:</b></small></div>
                 {block.megaBlobs && block.megaBlobs.length > 0 ? (
                     block.megaBlobs.map((megaBlob, idx) => (
                         <div key={idx}>

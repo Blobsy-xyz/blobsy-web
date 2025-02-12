@@ -2,43 +2,47 @@ import React from 'react';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../store/store';
 import '../../styles/leaderboard.css';
-import {unwrapResult} from "@reduxjs/toolkit";
 
 const TotalsPanel: React.FC = () => {
     const leaderboard = useSelector((state: RootState) => state.leaderboard);
+    const blobs = useSelector((state: RootState) => state.blobs);
+    const megaBlobs = useSelector((state: RootState) => state.aggBlobs.filter(blob => blob.is_aggregated));
+    const aggBlobs = useSelector((state: RootState) => state.aggBlobs);
+
     const totals = Object.values(leaderboard).reduce((acc, entry) => {
         acc.originalCost += entry.cost;
-        acc.savings += (entry.savings);
-        acc.noOfBlobs += entry.noOfBlobs;
-        acc.noOfAggBlobs += entry.noOfAggBlobs;
         return acc;
-    }, {originalCost: 0, savings: 0, noOfBlobs: 0, noOfAggBlobs: 0});
+    }, {originalCost: 0, aggCost: 0});
 
-    const noOfAggBlobs = useSelector((state: RootState) => state.noOfAggBlobs);
+    totals.aggCost = aggBlobs.reduce((sum, blob) => sum + blob.mega_blob_fee, 0);
+
+    const noOfBlobs = blobs.length;
+    const noOfAggBlobs = megaBlobs.length;
+
     return (
         <div className="totals-panel">
             <table>
                 <tbody>
                 <tr>
-                    <td>Original Cost (gwei):</td>
-                    <td><b>{totals.originalCost.toFixed(4)}</b></td>
+                    <td>Original Cost (ether):</td>
+                    <td><b>{(totals.originalCost / 1e9).toFixed(4)}</b></td>
                 </tr>
                 <tr>
-                    <td>Savings (gwei):</td>
+                    <td>Agg Cost (ether):</td>
                     <td>
-                        <small>({(totals.savings && totals.originalCost ? totals.savings / totals.originalCost * 100 : 0).toFixed(2)}%)</small>&nbsp;
-                        <b>{totals.savings.toFixed(4)}</b>
+                        <small>({(totals.aggCost && totals.originalCost ? totals.aggCost / totals.originalCost * 100 : 0).toFixed(2)}%)</small>&nbsp;
+                        <b>{(totals.aggCost / 1e9).toFixed(4)}</b>
                     </td>
                 </tr>
                 <tr>
                     <td>Original Blobs:</td>
-                    <td><b>{totals.noOfBlobs}</b></td>
+                    <td><b>{noOfBlobs}</b></td>
                 </tr>
                 <tr>
-                    <td>MegaBlobs:</td>
+                    <td>Mega Blobs:</td>
                     <td>
-                        <small>({(totals.noOfAggBlobs && totals.noOfBlobs ? totals.noOfAggBlobs / totals.noOfBlobs * 100 : 0).toFixed(2)}%)</small>&nbsp;
-                        <b>{totals.noOfAggBlobs}</b>
+                        <small>({(noOfAggBlobs && noOfBlobs ? noOfAggBlobs / noOfBlobs * 100 : 0).toFixed(2)}%)</small>&nbsp;
+                        <b>{noOfAggBlobs}</b>
                     </td>
                 </tr>
                 </tbody>

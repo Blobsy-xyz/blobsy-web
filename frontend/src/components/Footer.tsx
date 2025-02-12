@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
             }}
         >
             <small>
-                © {new Date().getFullYear()} <a href=">https://kriptal.io">Kriptal</a> All rights reserved.&nbsp;
+                © {new Date().getFullYear()} <a href=">https://blobsy.io">Blobsy</a> No rights reserved.&nbsp;
                 <a
                     href="#"
                     onClick={(e) => {
@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
                             `mailto:` + `${"info"}@${"kriptal"}.${"io"}`;
                     }}
                 >
-                    info@kriptal.io
+                    blob@blobsy.io
                 </a>
             </small>
         </footer>

@@ -35,11 +35,13 @@ function adoptData(data: any): any {
         ...data,
         block_number: data.blockNumber,
         block_timestamp: data.blockTimestamp,
+        new_tx_fee: Math.round((data.executionFeeEstimate) / 1e9),
+        new_blob_fee: Math.round((data.blobFeeEstimate) / 1e9),
         blobs: data.blobs.map((blob: any) => ({
             ...blob,
-            name: blob.from.slice(0, 5) + '...' + blob.to.slice(-5),
+            name: blob.fromName ? blob.fromName : blob.from.slice(0, 15),
             filled: Math.ceil(blob.actualBlobSize / blob.blobSize * 100),
-            blob_fee: parseFloat((blob.blobFee / 1e9).toFixed(4)),
+            blob_fee: Math.round((blob.blobFee + blob.executionTxFee) / 1e9),
             color: randomColor(blob.hash),
         })),
     };
@@ -49,8 +51,8 @@ class WebSocketService {
     private socket: WebSocket | null = null;
 
     connect() {
-        this.socket = new WebSocket('wss://blobsy.kriptal.io/ws');
-//        this.socket = new WebSocket('ws://localhost:8080');
+//        this.socket = new WebSocket('wss://blobsy.kriptal.io/ws');
+        this.socket = new WebSocket('ws://localhost:9933/blob-info');
         this.socket.onopen = () => console.log('Connected to WebSocket server.');
         this.socket.onmessage = (event) => {
             try {
