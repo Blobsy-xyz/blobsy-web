@@ -24,7 +24,7 @@ export interface MegaBlobData {
     segments: {
         rollup: string;
         filled: number;
-        blob_fee: number
+        blob_fee: number;
         space_saved: number;
         color: string;
     }[];
@@ -42,7 +42,7 @@ export interface Block {
 export interface LeaderboardEntry {
     name: string;
     cost: number;       // Sum of original blob fees
-    aggCost: number;       // Sum of original blob fees
+    aggCost: number;    // Sum of original blob fees
     aggBlobs: number;
     usedSpace: number;
     spaceSaved: number;
@@ -74,6 +74,12 @@ const updateLeaderboardWithAggregatedBlobs = createAsyncThunk(
     async (_, {getState}) => {
         const state = getState() as RootState;
         const block = state.blocks[0];
+
+        if (!block) {
+            console.error('No block found in state');
+            return;
+        }
+
         const new_tx_fee = block.new_tx_fee || 0;
         const new_blob_fee = block.new_blob_fee || 0;
 
@@ -87,6 +93,7 @@ const updateLeaderboardWithAggregatedBlobs = createAsyncThunk(
                 });
                 return {...megaBlob, segments: updatedSegments};
             });
+
             updatedMegaBlobs.forEach(megaBlob => {
                 const isAggregated = megaBlob.segments.length > 1;
                 megaBlob.segments.forEach(segment => {
@@ -152,7 +159,6 @@ const appSlice = createSlice({
             // Trigger aggregation whenever a new block is added
             setTimeout(() => {
                 aggregatorService.tryAggregate();
-
                 store.dispatch(updateLeaderboardWithAggregatedBlobs());
             }, 500);
         },
@@ -174,6 +180,7 @@ const appSlice = createSlice({
             const megaBlob = action.payload.megaBlob;
             megaBlob.is_aggregated = megaBlob.segments.length > 1;
             state.aggBlobs.push(megaBlob);
+            console.log('Added MegaBlob:', megaBlob);
         },
         removeBlobs(state, action: PayloadAction<string[]>) {
             const selectedIds = new Set(action.payload);

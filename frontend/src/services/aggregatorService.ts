@@ -1,9 +1,6 @@
-// src/services/aggregatorService.ts
-
 import {store, RootState, BlobData, MegaBlobData} from '../store/store';
 import {CONFIG} from '../config/config';
 import {addMegaBlob} from '../store/store';
-import {removeBlobs} from '../store/store'
 
 export class AggregatorService {
     tryAggregate() {
@@ -29,7 +26,6 @@ export class AggregatorService {
 
             if (isExpired || candidateFill >= CONFIG.AGGREGATION.MIN_FILL) {
                 this.createMegaBlobAndDispatch(candidate, Math.min(candidateFill, CONFIG.AGGREGATION.MAX_FILL));
-//                this.removeBlobsFromQueue(candidate);
 
                 // Remove blobs from the copied queue
                 const candidateIds = new Set(candidate.map(b => b.id));
@@ -53,8 +49,8 @@ export class AggregatorService {
 
         for (const blob of selectedBlobs) {
             if (!segmentsMap[blob.name]) {
-                segmentsMap[blob.name] = { filled: 0, color: blob.color };
-                rollupAggregation[blob.name] = { count: 0, totalFilled: 0, totalFee: 0 };
+                segmentsMap[blob.name] = {filled: 0, color: blob.color};
+                rollupAggregation[blob.name] = {count: 0, totalFilled: 0, totalFee: 0};
             }
             segmentsMap[blob.name].filled += blob.filled;
             rollupAggregation[blob.name].count += 1;

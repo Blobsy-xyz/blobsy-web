@@ -9,15 +9,17 @@ const TotalsPanel: React.FC = () => {
     const megaBlobs = useSelector((state: RootState) => state.aggBlobs.filter(blob => blob.is_aggregated));
     const aggBlobs = useSelector((state: RootState) => state.aggBlobs);
 
+    // Calculate totals
     const totals = Object.values(leaderboard).reduce((acc, entry) => {
         acc.originalCost += entry.cost;
         return acc;
     }, {originalCost: 0, aggCost: 0});
 
+    // Sum all mega_blob_fee from aggregated blobs
     totals.aggCost = aggBlobs.reduce((sum, blob) => sum + blob.mega_blob_fee, 0);
 
     const noOfBlobs = blobs.length;
-    const noOfAggBlobs = megaBlobs.length;
+    const noOfMegaBlobs = megaBlobs.length;
 
     return (
         <div className="totals-panel">
@@ -39,10 +41,10 @@ const TotalsPanel: React.FC = () => {
                     <td><b>{noOfBlobs}</b></td>
                 </tr>
                 <tr>
-                    <td>Mega Blobs:</td>
+                    <td>Aggregated Blobs:</td>
                     <td>
-                        <small>({(noOfAggBlobs && noOfBlobs ? noOfAggBlobs / noOfBlobs * 100 : 0).toFixed(2)}%)</small>&nbsp;
-                        <b>{noOfAggBlobs}</b>
+                        <small>({(noOfMegaBlobs && noOfBlobs ? noOfMegaBlobs / noOfBlobs * 100 : 0).toFixed(2)}%)</small>&nbsp;
+                        <b>{noOfMegaBlobs}</b>
                     </td>
                 </tr>
                 </tbody>

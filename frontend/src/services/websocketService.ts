@@ -1,11 +1,6 @@
 import {store} from '../store/store';
 import {addBlock} from '../store/store';
 
-// --- generate random color ---
-//function randomColor(): string {
-//    const shade = Math.round(88 + Math.random() * 90); // Generate shades around #7B58D6
-//    return `#7B${shade.toString(16)}D6`
-//}
 function randomHex(length: number): string {
     let result = '';
     const hexChars = '0123456789abcdef';
@@ -24,11 +19,6 @@ function randomColor(hash: string): string {
     }
     return result;
 }
-
-//function randomColor(): string {
-//    return '#' + randomHex(6);
-//}
-
 
 function adoptData(data: any): any {
     return {
@@ -51,7 +41,6 @@ class WebSocketService {
     private socket: WebSocket | null = null;
 
     connect() {
-//        this.socket = new WebSocket('wss://blobsy.kriptal.io/ws');
         this.socket = new WebSocket('ws://localhost:9933/blob-info');
         this.socket.onopen = () => console.log('Connected to WebSocket server.');
         this.socket.onmessage = (event) => {
