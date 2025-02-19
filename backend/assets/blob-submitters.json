@@ -1,0 +1,461 @@
+{
+  "submitters": [
+    {
+      "name": "Abstract",
+      "addresses": [
+        "0x11805594be0229ef08429d775af0c55f7c4535de"
+      ]
+    },
+    {
+      "name": "Arbitrum",
+      "addresses": [
+        "0xc1b634853cb333d3ad8663715b08f41a3aec47cc"
+      ]
+    },
+    {
+      "name": "Arena-Z",
+      "addresses": [
+        "0x2b8733e8c60a928b19bb7db1d79b918e8e09ac8c"
+      ]
+    },
+    {
+      "name": "Base",
+      "addresses": [
+        "0x5050f69a9786f081509234f1a7f4684b5e5b76c9"
+      ]
+    },
+    {
+      "name": "Binary",
+      "addresses": [
+        "0x7f9d9c1bce1062e1077845ea39a0303429600a06"
+      ]
+    },
+    {
+      "name": "Binary Network",
+      "addresses": [
+        "0x68d5bbf3a01ecbb47ce38cf64a7d6c0ea618040f"
+      ]
+    },
+    {
+      "name": "Blast",
+      "addresses": [
+        "0x415c8893d514f9bc5211d36eeda4183226b84aa7"
+      ]
+    },
+    {
+      "name": "Boba Network",
+      "addresses": [
+        "0xe1b64045351b0b6e9821f19b39f81bc4711d2230"
+      ]
+    },
+    {
+      "name": "Camp Network",
+      "addresses": [
+        "0x08f9f14ff43e112b18c96f0986f28cb1878f1d11"
+      ]
+    },
+    {
+      "name": "Debank Chain",
+      "addresses": [
+        "0x7ab7da0c3117d7dfe0abfaa8d8d33883f8477c74"
+      ]
+    },
+    {
+      "name": "Ethernity",
+      "addresses": [
+        "0x43ca061ea80fbb4a2b5515f4be4e953b191147af"
+      ]
+    },
+    {
+      "name": "Fuel",
+      "addresses": [
+        "0xea0337efc12e98ab118948da570c07691e8e4b37"
+      ]
+    },
+    {
+      "name": "HashKey",
+      "addresses": [
+        "0x9391791f7cb74f8bfda65edc0749efd964311b55"
+      ]
+    },
+    {
+      "name": "Hemi Network",
+      "addresses": [
+        "0x65115c6d23274e0a29a63b69130efe901aa52e7a"
+      ]
+    },
+    {
+      "name": "Infinaeon",
+      "addresses": [
+        "0xebac13ec21937c6eb2b65eb970dbdaca56c9c8b8"
+      ]
+    },
+    {
+      "name": "Ink",
+      "addresses": [
+        "0x500d7ea63cf2e501dadaa5feec1fc19fe2aa72ac"
+      ]
+    },
+    {
+      "name": "Kinto",
+      "addresses": [
+        "0xe27f3f6db6824def1738b2aace2672ac59046a39"
+      ]
+    },
+    {
+      "name": "Kroma",
+      "addresses": [
+        "0x41b8cd6791de4d8f9e0eaf7861ac506822adce12"
+      ]
+    },
+    {
+      "name": "Lambda",
+      "addresses": [
+        "0xdec273bf31ad79ad00d619c52662f724176a12fb"
+      ]
+    },
+    {
+      "name": "Linea",
+      "addresses": [
+        "0xa9268341831efa4937537bc3e9eb36dbece83c7e",
+        "0x46d2f319fd42165d4318f099e143dea8124e9e3e"
+      ]
+    },
+    {
+      "name": "Lisk",
+      "addresses": [
+        "0xa6ea2f3299b63c53143c993d2d5e60a69cd6fe24"
+      ]
+    },
+    {
+      "name": "Lumio",
+      "addresses": [
+        "0x5c53f2ff1030c7fbc0616fd5b8fc6be97aa27e00"
+      ]
+    },
+    {
+      "name": "MetaMail",
+      "addresses": [
+        "0xee12c640b0793cf514e42ea1c428bd5399545d4d"
+      ]
+    },
+    {
+      "name": "Metal",
+      "addresses": [
+        "0xc94c243f8fb37223f3eb2f7961f7072602a51b8b"
+      ]
+    },
+    {
+      "name": "Mint",
+      "addresses": [
+        "0x68bdfece01535090c8f3c27ec3b1ae97e83fa4aa"
+      ]
+    },
+    {
+      "name": "Mode",
+      "addresses": [
+        "0x99199a22125034c808ff20f377d91187e8050f2e"
+      ]
+    },
+    {
+      "name": "Morph",
+      "addresses": [
+        "0x61f2945d4bc9e40b66a6376d1094a50438f613e2",
+        "0xbba36cdf020788f0d08d5688c0bee3fb30ce1c80",
+        "0x6ab0e960911b50f6d14f249782ac12ec3e7584a0",
+        "0x34e387b37d3adeaa6d5b92ce30de3af3dca39796",
+        "0xa59b26db10c5ca26a97aa2fd2e74cb8da9d1eb65",
+        "0xf834ffbeb6bb3f4841afc6b5fb40b94cd580fa23",
+        "0xb6cf39ee72e0127e6ea6059e38b8c197227a6ac7"
+      ]
+    },
+    {
+      "name": "Nal",
+      "addresses": [
+        "0xb1b676357de100c5bd846299cf6c85436803e839"
+      ]
+    },
+    {
+      "name": "Nanon Network",
+      "addresses": [
+        "0xe42aa6d07e28655bc060251d6ccbb1368e4333fd"
+      ]
+    },
+    {
+      "name": "OP Mainnet",
+      "addresses": [
+        "0x6887246668a3b87f54deb3b94ba47a6f63f32985"
+      ]
+    },
+    {
+      "name": "Optopia",
+      "addresses": [
+        "0x3d0bf26e60a689a7da5ea3ddad7371f27f7671a5"
+      ]
+    },
+    {
+      "name": "PandaSea",
+      "addresses": [
+        "0x4d875acfd836eb3d8a2f25ba03de16c97ec9fc0f",
+        "0xf4559766b24402f0fff8fc5a6835d5f6e837aed3"
+      ]
+    },
+    {
+      "name": "Paradex",
+      "addresses": [
+        "0xc70ae19b5feaa5c19f576e621d2bad9771864fe2"
+      ]
+    },
+    {
+      "name": "Parallel",
+      "addresses": [
+        "0x5ead389b57d533a94a0eacd570dc1cc59c25f2d4",
+        "0x40acdc94a00b33151b40763b3fed7c46ff639df4"
+      ]
+    },
+    {
+      "name": "Phala Network",
+      "addresses": [
+        "0x9fb23129982c993743eb9bb156af8cc8fa2ac761"
+      ]
+    },
+    {
+      "name": "Polynomial",
+      "addresses": [
+        "0x67a44ce38627f46f20b1293960559ed85dd194f1"
+      ]
+    },
+    {
+      "name": "R0AR Chain",
+      "addresses": [
+        "0x2986bf308d0684ad77cd32ee1c60429e6573b5af",
+        "0xf263a0aa8afeaa7d516b596d49d7ba6c0feb102c"
+      ]
+    },
+    {
+      "name": "RACE",
+      "addresses": [
+        "0x8cda8351236199af7532bad53d683ddd9b275d89"
+      ]
+    },
+    {
+      "name": "Rari",
+      "addresses": [
+        "0x52ee324f2bcd0c5363d713eb9f62d1ee47266ac1"
+      ]
+    },
+    {
+      "name": "SNAXchain",
+      "addresses": [
+        "0x060b915ca4904b56ada63565626b9c97f6cad212"
+      ]
+    },
+    {
+      "name": "Scroll",
+      "addresses": [
+        "0xcf2898225ed05be911d3709d9417e86e0b4cfc8f",
+        "0x054a47b9e2a22af6c0ce55020238c8fecd7d334b"
+      ]
+    },
+    {
+      "name": "Shape",
+      "addresses": [
+        "0xf7ca543d652e38692fd12f989eb55b5327ec9a20"
+      ]
+    },
+    {
+      "name": "Soneium",
+      "addresses": [
+        "0x6776be80dbada6a02b5f2095cf13734ac303b8d1"
+      ]
+    },
+    {
+      "name": "StarkNet",
+      "addresses": [
+        "0x2c169dfe5fbba12957bdd0ba47d9cedbfe260ca7"
+      ]
+    },
+    {
+      "name": "Superseed",
+      "addresses": [
+        "0xa9b074b27de97f492f8f07fd7c213400e4ca5391"
+      ]
+    },
+    {
+      "name": "Swan Chain",
+      "addresses": [
+        "0xde794bec196832474f2f218135bfd0f7ca7fb038"
+      ]
+    },
+    {
+      "name": "Swell",
+      "addresses": [
+        "0xf854cd5b26bfd73d51236c0122798907ed65b1f2"
+      ]
+    },
+    {
+      "name": "Taiko (Official)",
+      "addresses": [
+        "0x000000633b68f5d8d3a86593ebb815b4663bcbe0"
+      ]
+    },
+    {
+      "name": "Taiko (Unofficial)",
+      "addresses": [
+        "0x41f2f55571f9e8e3ba511adc48879bd67626a2b6",
+        "0x66cc9a0eb519e9e1de68f6cf0aa1aa1efe3723d5",
+        "0x9084ee7f65d32763ac436e4fc971e7d2cc52e672",
+        "0x79fb4ebdd543d0927b809b1e8f552f1bf74dec65",
+        "0x9a5cc6e3a3325cdc19fc76926cc9666c80139c09",
+        "0xc23ff969d6a84a3b6c8c8fa9ca8d9b0f1f7176f7",
+        "0x2802e30d61d5ac0879c4f0c2825201a3d9c250ef",
+        "0x32f2713b062134e69f5006eb070bc41d9765f5c8",
+        "0xb462b6b8cfebec29e08a0dfd6e23ca2cab39171e",
+        "0x3b45aab9238b22fca2957b97ffca63a68f7387da",
+        "0x574f7c2aa6d650701e26da5d862365ed93e1dc5a",
+        "0x7c806427c329c0b52012649ae92d312d34c6de88",
+        "0xb9e500cf14b355f50217f1a89040df1765c5e70e",
+        "0x438ac2af7b70f1b12b114d8ed2937e2f9caa7706",
+        "0x70105426726a7b7604420cdf40b64cd70c3b385b",
+        "0xd8c860d789ec1c6ae9631b680e6555f25bc28331",
+        "0x13840541982739888223e745e19d4d97a482bec8",
+        "0x8e3e0967d50bd4bb31be3d01dd834bd874a1f5ff",
+        "0x6779030bc30a2dda8a419f2b78495f34c469af42",
+        "0x30202b80ec53aa6ad79f499b7c0f4216d615a7a0",
+        "0x31d2b422a0b0bd0e8e2570623c10bccba2c0fb80",
+        "0x62ceb87704fca2b258372ad4ee2b580dc0fb0547",
+        "0x5307ca82eb1e6df288c000ecb4502f7df4b90544",
+        "0x71bfd4d67b67c6b8d76b23ab3783c587a8f3e0ce",
+        "0x856a2227db8fe6c204770e2fd2ccf7c753c86676",
+        "0x655215cc4f8cbea4f5e45596f0f66048926efa73",
+        "0x9a8d53b5196f8f86c09207dc3b3c37e92c270bc3",
+        "0xe90c2b45017bc816b57ff7ea43dd526acc8790e8",
+        "0x44a2b7301baaba60a4bea437cd782990464a3d37",
+        "0x96c684275430ed136f8d171d2b04cac66e9d38a7",
+        "0xdbaaa3712a6bb19dbdc6913b57bbef2e75d2d52f",
+        "0x439199c09270981a0163926f9366bebbed32e083",
+        "0x09dc29cecca95d35d0059cf3ae8c1642f25d0402",
+        "0x8c9f50bba3ac54e90ba40577a04326be48da29ba",
+        "0x9419178e0b679f77e8923595977bdc5c29532936",
+        "0x10e41c4257084142cbe8aa7e485bf976626c55cd",
+        "0x377499a367adde67ca56d6a11c724426bdb8e890",
+        "0x29708cdc654caaa1b4c07291b5be25de3895b6a6",
+        "0xafa97af538be90e6e7746f5996d20878bb89b358",
+        "0x7537db88f214a28af82bfc9647cd7d6681d3981a",
+        "0x8b1f05688be6fc02f6dd5a103edb62dd64285ba4",
+        "0xdbfe9e61e92a8b9f9705968ea86150c089a4b165",
+        "0xf6b32de621cd874f49042e387adca0654f8d32c7",
+        "0x02233ba9a3422fe48068c5f32722c64590cc283e",
+        "0xb9a8f954a99880d663bdc64ab362ab298bf8046c",
+        "0x3588d78bf674787b6d3f3b65f60d2a77347f31f2",
+        "0xeeb9f6085a2537d4b097f82874dbc0a673c1a291",
+        "0x4ff82452a8d0f94a3b52f6a891e5b794d7a2fd52",
+        "0x2d7060225b957e27e2d31dd17a441143b823190f",
+        "0x7705eced8b3b027df04231d0e8d74f68f46aeae0",
+        "0x73eb87813a44593aa316dd33099ff1d095260653",
+        "0x1a0629cf2a8e15082c719e51bdd77b85a6740b11",
+        "0xdf09dd3a07830123df53fe8e839b903f99a7a018",
+        "0x2e453f7512c5ec67feaff04fc742725ad3da5485",
+        "0xe23c4c6c6bdd3e82fd7779c6e137f177ce89d6b8",
+        "0x07ce1b7dbe73f636994da7d81eccb13bbd4aa0c3",
+        "0x2b7aba5f19d22512c0af07a6c8c10477465bb070",
+        "0xd6bd727e59b06ba114dcdb80424556ccbb1a8910",
+        "0x2d20b85ade09db4a56d51154efeb25736de6f19e",
+        "0xb03a908d0690056c778feb6fffd6c0eb7fd41bc7",
+        "0xfb69253d8dd7721aabe1be9bb117d8038f37a618",
+        "0x6343e0acf6693d204eaf2083a7b24652d5c5809f",
+        "0x136596d0f11dea4cb24485cf7efa4515b6063592",
+        "0x3a27d6fdb05aa6f6e1b64cea853c604fccdad2f3",
+        "0x9591b6d9d008094fcbd8e9a83c083ae610505530",
+        "0x0896aba16972f5a240e5abbe2b23a0e7220f0b6b",
+        "0x9588ee99cdf3c16e650cf2a891f5d970f4a457c1",
+        "0xc09f5bc93fc89728665852207ae17fe5cd084ad0",
+        "0x02e23720411bb54ef1448e477ff65d5d377917cf",
+        "0x302b5025f2be3818a6036c0e5e53129c0960922d",
+        "0x8c0269559a3b435db4c03139dc463726debd728a",
+        "0xc2389bdfaca1b8de3fe0bf4e8c28a4ee5fc586dc",
+        "0x33ea2b64a957eb955bf0aaa8238f516f5dc71b25",
+        "0x8175315e9cb5c4db7c6d90892a1de2d66fe5e9b1",
+        "0x6330f358cba5bb756e30ddd59e00e9c1eb80c59d",
+        "0x457c54a067271b5e290c558c5cf5263a2cc91744",
+        "0x3537fc0d8f4507c1704fa56b325c8d8cd586e4b9",
+        "0x61c4aeab010a6e0fb2a0832c2c6714ba0e2a608a",
+        "0x4e39deb4b4a40bfa18436450a36496fb184141fc",
+        "0xe17c2b89f5924654792cac6773dc3cdc3c41f2ab",
+        "0x0ea3daf5e2bcf048e4f088503b9673744e95be36",
+        "0x622b6ce9bc3bfef1d54f267f815b756f66b3eaab",
+        "0x0a1d6e0583a159a25fb5bcbe65d957a4cf85e068",
+        "0x01d0ff95f89080ba23dfe81ada5b7d2871d15bb1",
+        "0xca4436dba00e58c37a3da9f21b90ffdad0c63a8f",
+        "0x4234bfde32bfcfc9db957cca99247997c2c3df79",
+        "0x66db569b9c529caa58c0695316406201feeb4b4d",
+        "0x005a6f581d415925aaacd153d68dd3f876ddf04d",
+        "0x1045d1dd8d5ee1a905c2b0b611f3141df04059c2",
+        "0x6b19e9a17399f9034bdc59cb8a6aecda672d6c2a",
+        "0x83efd3ee9278cc7800e93e7f9a14607f5c331b3e",
+        "0xd3da723d01823613212fbee6a0a8a2a70b9e46e1",
+        "0x67b61daff844346d32766dee2dec4393c9549c85",
+        "0xc8fe2ae068fd9a19ee7daa8674971938322364e1",
+        "0x732b0ab636b17abe9fd70900b152117f2680159a",
+        "0x8e1233a5df95e28aff4115d44b2094c6e48744f5",
+        "0x098d3b9d61de50bd85059969d1b302047d0ac73a",
+        "0x36f89c963e30bf82b214056986d3493e89320712",
+        "0x5a0c30dd34d0a05742c64725d44505607e6fbee4",
+        "0x6842922c2f166e0e615c1d997d55df9f4c689d0f",
+        "0x7a1c0d9fbf1cf83804c1f3d163e731169ea88d7c",
+        "0x2646fd1cf53139c336db689ff104c6ce3ba9b18b",
+        "0xaab4eaffd2114422c93e3fbbc548985c94b30897",
+        "0xe279e51a840857233960e636fd725fb229e23576",
+        "0x14f5bba23dc3a21131fd9e7894d633ccb0981542",
+        "0x8be4491ced884d5c6b1667bd4e20b975e079a469",
+        "0x56008924d31aa5551b61e02121c6b553f3955678",
+        "0xb1247ae0d02ad4a41df80d656150b3de7981e081",
+        "0xa23aa152df1b0d7921dc06276d8a4373791a0247",
+        "0x5e051c41c017e9487dc9d105b162fd788c3a3741",
+        "0x5512fd4e933de73abd489e8a93033b5b6d2477a4"
+      ]
+    },
+    {
+      "name": "Unichain",
+      "addresses": [
+        "0x2f60a5184c63ca94f82a27100643dbabe4f3f7fd"
+      ]
+    },
+    {
+      "name": "World Chain",
+      "addresses": [
+        "0xdbbe3d8c2d2b22a2611c5a94a9a12c2fcd49eb29"
+      ]
+    },
+    {
+      "name": "XGA",
+      "addresses": [
+        "0x90680f0f6d63060fb7a16bdc722a85b992dd5047"
+      ]
+    },
+    {
+      "name": "ZERO Network",
+      "addresses": [
+        "0x479b7c95b9509e1a834c994fc94e3581aa8a73b9"
+      ]
+    },
+    {
+      "name": "Zircuit",
+      "addresses": [
+        "0xaf1e4f6a47af647f87c0ec814d8032c4a4bff145"
+      ]
+    },
+    {
+      "name": "Zora",
+      "addresses": [
+        "0x625726c858dbf78c0125436c943bf4b4be9d9033"
+      ]
+    },
+    {
+      "name": "zkSync Era",
+      "addresses": [
+        "0x0d3250c3d5facb74ac15834096397a3ef790ec99"
+      ]
+    }
+  ]
+}
