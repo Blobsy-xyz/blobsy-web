@@ -1,7 +1,6 @@
 {
   "name": "backend",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "0.1.0",
   "scripts": {
     "start": "ts-node src/server.ts",
     "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
@@ -11,14 +10,22 @@
   "author": "",
   "license": "ISC",
   "description": "",
-  "dependencies": {
-    "ws": "^8.18.0"
-  },
   "devDependencies": {
-    "@types/node": "^22.13.0",
-    "@types/ws": "^8.5.14",
-    "nodemon": "^3.1.9",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+  "@types/jest": "^29.5.14",
+  "@types/node": "^22.13.0",
+  "@types/ws": "^8.5.14",
+  "jest": "^29.7.0",
+  "nodemon": "^3.1.9",
+  "ts-jest": "^29.2.5",
+  "ts-node": "^10.9.2",
+  "typescript": "^5.7.3"
+},
+"dependencies": {
+    "axios": "^1.7.9",
+    "class-transformer": "^0.5.1",
+    "dotenv": "^16.4.7",
+    "reflect-metadata": "^0.2.2",
+    "viem": "^2.23.2",
+    "ws": "^8.18.0"
   }
 }

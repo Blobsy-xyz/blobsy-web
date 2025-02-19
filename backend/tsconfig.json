@@ -1,10 +1,42 @@
 {
+  // https://github.com/wevm/viem/blob/main/tsconfig.base.json
   "compilerOptions": {
-    "target": "ES6",
-    "module": "commonjs",
     "outDir": "dist",
     "rootDir": "src",
+
+    // Type checking
     "strict": true,
-    "esModuleInterop": true
-  }
+    "noImplicitReturns": true, // Not enabled by default in `strict` mode.
+    "useUnknownInCatchVariables": true,
+    "noImplicitOverride": true, // Not enabled by default in `strict` mode.
+    "exactOptionalPropertyTypes": true,
+
+    // JavaScript support
+    "allowJs": false,
+    "checkJs": false,
+
+    // Interop constraints
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Language and environment
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "target": "ES2021", // Setting this to `ES2021` enables native support for `Node v16+`: https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping.
+    "lib": [
+      "ES2022", // By using ES2022 we get access to the `.cause` property on `Error` instances.
+      "DOM" // We are adding `DOM` here to get the `fetch`, etc. types. This should be removed once these types are available via DefinitelyTyped.
+    ],
+
+    // Skip type checking for node modules
+    "skipLibCheck": true,
+    "noErrorTruncation": true,
+
+    // Decorators
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+    "include": [
+        "src"
+    ],
 }
