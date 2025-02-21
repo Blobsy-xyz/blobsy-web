@@ -1,6 +1,6 @@
 import {existsSync, readFileSync, writeFileSync} from "fs";
-import {Block, TransactionEIP4844} from "viem";
-import {BlobInfo, BlockWithBlobs} from "./types";
+import {Address, Block, TransactionEIP4844} from "viem";
+import {AddressConfig, BlobInfo, BlockWithBlobs} from "./types";
 import {failure, Result, success} from "./result";
 import {beaconClient} from "../api/axios";
 import {getMedianFee, isTransactionArray, timestampToSlotNumber} from "./utils";
@@ -8,6 +8,8 @@ import {provider} from "../config/viem";
 import {BLOB_AGG_TX_GAS_USED_ESTIMATE, GAS_PER_BLOB} from "../config/constants";
 import {instanceToPlain, plainToInstance} from "class-transformer";
 import {BeaconBlobSidecarResponse} from "../api/models";
+import {HISTORY_FILE, HISTORY_RETENTION_SECONDS, NAMED_BLOB_SUBMITTERS_FILE} from "../config/config";
+import {resolve} from "path";
 
 const BLOB_SIDECAR_RETRY_INTERVAL_MS = 1000;
 const BLOB_SIDECAR_MAX_ATTEMPTS = 5;
@@ -16,16 +18,8 @@ export class BlobDataService {
     // Store the latest average blob fee to estimate the next blob fee even when the current block does not have any blob transactions
     private latestAvgBlobFee: bigint = -1n;
     private senderReceiverToId: Map<string, bigint> = new Map();
-
-    constructor(
-        private readonly historyFile: string,
-        private readonly historyRetentionSec: number,
-        private readonly namedAddresses: Map<string, string>
-    ) {
-        this.historyFile = historyFile;
-        this.historyRetentionSec = historyRetentionSec;
-        this.namedAddresses = namedAddresses;
-    }
+    private readonly historyFile = resolve(HISTORY_FILE);
+    private readonly namedAddresses = this.loadNamedSubmitters();
 
     /**
      * Processes a block with EIP-4844 blob transactions:
@@ -190,7 +184,7 @@ export class BlobDataService {
         blocks.push(blockWithBlobs);
 
         // Filter out blocks older than the retention threshold
-        const retentionThreshold = Date.now() / 1000 - this.historyRetentionSec;
+        const retentionThreshold = Date.now() / 1000 - HISTORY_RETENTION_SECONDS;
         const filteredBlocks = blocks.filter(block => block.blockTimestamp >= retentionThreshold);
 
         // Find removed blocks
@@ -202,5 +196,22 @@ export class BlobDataService {
         // Serialize the filtered blocks back to the history file
         const plainObject = instanceToPlain(filteredBlocks);
         writeFileSync(this.historyFile, JSON.stringify(plainObject, null, 2), "utf-8");
+    }
+
+    /**
+     * Loads named submitters from the given file path. If the file is not found, an empty map is returned.
+     * @private
+     */
+    private loadNamedSubmitters(): Map<Address, string> {
+        if (!NAMED_BLOB_SUBMITTERS_FILE) {
+            return new Map();
+        }
+
+        const addressConfig: AddressConfig = JSON.parse(readFileSync(NAMED_BLOB_SUBMITTERS_FILE, 'utf-8'));
+        return new Map(
+            addressConfig.submitters.flatMap(({name, addresses}) =>
+                addresses.map(address => [address, name])
+            )
+        );
     }
 }

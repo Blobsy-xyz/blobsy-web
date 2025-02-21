@@ -1,29 +1,21 @@
-import {WebSocketServer, WebSocket} from 'ws';
-import {resolve} from 'path';
+import {WebSocket, WebSocketServer} from 'ws';
 import {BlobDataService} from "./BlobDataService";
-import {HISTORY_FILE, HISTORY_RETENTION_SECONDS, PORT, NAMED_BLOB_SUBMITTERS_FILE} from "../config/config";
+import {PORT} from "../config/config";
 import {provider} from "../config/viem";
 import {instanceToPlain} from "class-transformer";
-import {Address} from "viem";
-import {AddressConfig} from "./types";
-import {readFileSync} from "fs";
 import * as http from 'http';
 
 const BLOB_INFO_ENDPOINT = '/blob-info';
 const BLOB_INFO_HISTORY_ENDPOINT = '/blob-info-history';
 
 export class BlobsWebsocket {
-    private readonly historyFile: string;
-    private readonly namedAddresses: Map<Address, string>;
-    private readonly blobs: BlobDataService;
+    private readonly blobService: BlobDataService;
     private readonly wss: WebSocketServer;
     private readonly server: http.Server;
     private activeClient: WebSocket | null = null; // Single active connection
 
     constructor() {
-        this.historyFile = resolve(HISTORY_FILE);
-        this.namedAddresses = NAMED_BLOB_SUBMITTERS_FILE ? this.loadNamedSubmitters(NAMED_BLOB_SUBMITTERS_FILE) : new Map();
-        this.blobs = new BlobDataService(this.historyFile, HISTORY_RETENTION_SECONDS, this.namedAddresses);
+        this.blobService = new BlobDataService();
 
         // Create HTTP server
         this.server = http.createServer(this.handleHttpRequest.bind(this));
@@ -71,7 +63,7 @@ export class BlobsWebsocket {
         provider.watchBlocks({
             includeTransactions: true,
             onBlock: async (block) => {
-                const result = await this.blobs.processBlock(block);
+                const result = await this.blobService.processBlock(block);
                 if (result.isFailure()) {
                     console.error('Error processing block:', result.unwrapError());
                     return;
@@ -105,15 +97,6 @@ export class BlobsWebsocket {
             res.writeHead(404, {'Content-Type': 'text/plain'});
             res.end('Not Found\n');
         }
-    }
-
-    private loadNamedSubmitters(filePath: string): Map<Address, string> {
-        const addressConfig: AddressConfig = JSON.parse(readFileSync(filePath, 'utf-8'));
-        return new Map(
-            addressConfig.submitters.flatMap(({name, addresses}) =>
-                addresses.map(address => [address, name])
-            )
-        );
     }
 
     private shutdown(): void {
