@@ -88,15 +88,19 @@ export class BlobsWebsocket {
 
     private handleHttpRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
         if (req.url === BLOB_INFO_HISTORY_ENDPOINT && req.method === 'GET') {
-            console.log(`Received request to ${BLOB_INFO_HISTORY_ENDPOINT} endpoint`);
+            console.log(`Received request to ${BLOB_INFO_HISTORY_ENDPOINT} endpoint from ${req.socket.remoteAddress}`);
+
+            const blocks = this.blobService.loadBlocksFromHistory();
+            const json = JSON.stringify(instanceToPlain(blocks), null, 2);
+
             res.writeHead(200, {'Content-Type': 'text/plain'});
-            // TODO: Implement blob info history fetching
-            res.end('Todo');
-        } else {
-            console.log(`Received request to unknown endpoint ${req.url}`);
-            res.writeHead(404, {'Content-Type': 'text/plain'});
-            res.end('Not Found\n');
+            res.end(json);
+            return;
         }
+
+        console.log(`Received request to unknown endpoint ${req.url}`);
+        res.writeHead(404, {'Content-Type': 'text/plain'});
+        res.end('Not Found\n');
     }
 
     private shutdown(): void {

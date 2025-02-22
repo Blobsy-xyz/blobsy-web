@@ -147,6 +147,25 @@ export class BlobDataService {
         return success(blockWithBlobs);
     }
 
+    /**
+     * Loads all blocks with blobs from the history file.
+     * @returns Array of all BlockWithBlobs from the history file.
+     */
+    public loadBlocksFromHistory(): BlockWithBlobs[] {
+        if (!existsSync(this.historyFile)) {
+            console.log(`History file ${this.historyFile} does not exist, returning empty array`);
+            return [];
+        }
+
+        try {
+            const rawData = readFileSync(this.historyFile, 'utf-8');
+            return plainToInstance(BlockWithBlobs, JSON.parse(rawData)) as BlockWithBlobs[];
+        } catch (error) {
+            console.error(`Failed to load history from ${this.historyFile}:`, error);
+            return [];
+        }
+    }
+
     private async getBlobSidecarsWithRetries(slotNumber: bigint): Promise<Result<BeaconBlobSidecarResponse, Error>> {
         for (let attempt = 1; attempt <= BLOB_SIDECAR_MAX_ATTEMPTS; attempt++) {
             const blobSidecarsResult = await beaconClient.getBlobSidecars(slotNumber.toString());
