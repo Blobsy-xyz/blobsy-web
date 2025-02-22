@@ -21,6 +21,9 @@ export class BlobDataService {
     private readonly historyFile = resolve(HISTORY_FILE);
     private readonly namedAddresses = this.loadNamedSubmitters();
 
+    // Caches the last block number to prevent duplicate processing as a safeguard
+    private previousBlock = 0n;
+
     /**
      * Processes a block with EIP-4844 blob transactions:
      *  - For each blob sidecar calculates:
@@ -38,10 +41,14 @@ export class BlobDataService {
      */
     public async processBlock(block: Block): Promise<Result<BlockWithBlobs, Error>> {
         console.log(`Processing block ${block.number}`);
+
+        // Validate block
+        if (this.previousBlock === block.number) {
+            return failure(new Error(`Block ${block.number} already processed`));
+        }
         if (block.number == null) {
             return failure(new Error('Block number is null'));
         }
-
         if (!isTransactionArray(block.transactions)) {
             return failure(new Error('Block does not have full info about transactions. Include "includeTransactions: true" when fetching the block'));
         }
