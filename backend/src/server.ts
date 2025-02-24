@@ -2,7 +2,7 @@
 // It should be imported once in the main file of the project.
 import "reflect-metadata";
 
-import {BlobsWebsocket} from "./core/BlobsWebsocket";
+import {BlobsWebsocket} from "./core/BlobsWebsocket.js";
 
 async function startServer() {
     const server = new BlobsWebsocket();

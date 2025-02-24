@@ -1,5 +1,5 @@
 import {instanceToPlain, plainToClass} from "class-transformer";
-import {BigIntTransformer} from "../src/core/types";
+import {BigIntTransformer} from "../src/core/types.js";
 
 class TestClass {
     @BigIntTransformer()

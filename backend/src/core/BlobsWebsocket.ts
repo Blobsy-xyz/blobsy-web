@@ -1,7 +1,7 @@
 import {WebSocket, WebSocketServer} from 'ws';
-import {BlobDataService} from "./BlobDataService";
-import {PORT} from "../config/config";
-import {provider} from "../config/viem";
+import {BlobDataService} from "./BlobDataService.js";
+import {PORT} from "../config/config.js";
+import {provider} from "../config/viem.js";
 import {instanceToPlain} from "class-transformer";
 import * as http from 'http';
 

@@ -1,7 +1,7 @@
 import {AxiosInstance} from "axios";
-import {failure, Result, success} from "../core/result";
+import {failure, Result, success} from "../core/result.js";
 import {plainToInstance} from "class-transformer";
-import {BeaconBlobSidecarResponse} from "./models";
+import {BeaconBlobSidecarResponse} from "./models.js";
 
 /**
  * Beacon API client.

@@ -1,5 +1,5 @@
 import {FeeHistory, Hash, PublicClient, Transaction} from "viem";
-import {failure, Result, success} from "./result";
+import {failure, Result, success} from "./result.js";
 
 /**
  * Converts a block timestamp to a slot number

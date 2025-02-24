@@ -1,14 +1,14 @@
 import {existsSync, readFileSync, writeFileSync} from "fs";
 import {Address, Block, TransactionEIP4844} from "viem";
-import {AddressConfig, BlobInfo, BlockWithBlobs} from "./types";
-import {failure, Result, success} from "./result";
-import {beaconClient} from "../api/axios";
-import {getMedianFee, isTransactionArray, timestampToSlotNumber} from "./utils";
-import {provider} from "../config/viem";
-import {BLOB_AGG_TX_GAS_USED_ESTIMATE, GAS_PER_BLOB} from "../config/constants";
+import {AddressConfig, BlobInfo, BlockWithBlobs} from "./types.js";
+import {failure, Result, success} from "./result.js";
+import {beaconClient} from "../api/axios.js";
+import {getMedianFee, isTransactionArray, timestampToSlotNumber} from "./utils.js";
+import {provider} from "../config/viem.js";
+import {BLOB_AGG_TX_GAS_USED_ESTIMATE, GAS_PER_BLOB} from "../config/constants.js";
 import {instanceToPlain, plainToInstance} from "class-transformer";
-import {BeaconBlobSidecarResponse} from "../api/models";
-import {HISTORY_FILE, HISTORY_RETENTION_SECONDS, NAMED_BLOB_SUBMITTERS_FILE} from "../config/config";
+import {BeaconBlobSidecarResponse} from "../api/models.js";
+import {HISTORY_FILE, HISTORY_RETENTION_SECONDS, NAMED_BLOB_SUBMITTERS_FILE} from "../config/config.js";
 import {resolve} from "path";
 
 const BLOB_SIDECAR_RETRY_INTERVAL_MS = 1000;

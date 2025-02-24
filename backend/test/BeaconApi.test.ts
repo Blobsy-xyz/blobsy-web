@@ -1,8 +1,8 @@
 import {hexToBytes} from "viem";
 import {plainToInstance} from "class-transformer";
-import {success} from "../src/core/result";
-import {BeaconBlobSidecar, BeaconBlobSidecarResponse} from "../src/api/models";
-import {BeaconApi} from "../src/api/BeaconApi";
+import {success} from "../src/core/result.js";
+import {BeaconBlobSidecar, BeaconBlobSidecarResponse} from "../src/api/models.js";
+import {BeaconApi} from "../src/api/BeaconApi.js";
 import axios from "axios";
 
 describe("BeaconApi Unit Tests", () => {
