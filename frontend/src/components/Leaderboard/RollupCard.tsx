@@ -10,19 +10,19 @@ interface RollupCardProps {
 
 const selectBlobs = createSelector(
     (state: RootState) => state.blobs,
-    (_, entry: LeaderboardEntry) => entry.name,
+    (_: any, entry: LeaderboardEntry) => entry.name,
     (blobs: any[], name: string) => blobs.filter((blob: any) => blob.name === name)
 );
 
 const selectAggBlobs = createSelector(
     (state: RootState) => state.aggBlobs,
-    (_, entry: LeaderboardEntry) => entry.name,
+    (_: any, entry: LeaderboardEntry) => entry.name,
     (aggBlobs: any[], name: string) => aggBlobs.filter((megaBlob: any) => megaBlob.is_aggregated && megaBlob.segments.some((segment: any) => segment.rollup === name))
 );
 
 const selectAllAggBlobs = createSelector(
     (state: RootState) => state.aggBlobs,
-    (_, entry: LeaderboardEntry) => entry.name,
+    (_: any, entry: LeaderboardEntry) => entry.name,
     (aggBlobs: any[], name: string) => aggBlobs.filter(megaBlob => megaBlob.segments.some((segment: any) => segment.rollup === name))
 );
 

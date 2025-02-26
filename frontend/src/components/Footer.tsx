@@ -18,17 +18,7 @@ const Footer: React.FC = () => {
             }}
         >
             <small>
-                © {new Date().getFullYear()} <a href=">https://blobsy.io">Blobsy</a> No rights reserved.&nbsp;
-                <a
-                    href="#"
-                    onClick={(e) => {
-                        e.preventDefault();
-                        window.location.href =
-                            `mailto:` + `${"info"}@${"kriptal"}.${"io"}`;
-                    }}
-                >
-                    blob@blobsy.io
-                </a>
+                © {new Date().getFullYear()} <a href=">https://blobsy.xyz">Blobsy</a> No rights reserved.&nbsp;
             </small>
         </footer>
     );
