@@ -12,14 +12,13 @@ export class BlobsWebsocket {
     private readonly blobService: BlobDataService;
     private readonly wss: WebSocketServer;
     private readonly server: http.Server;
-    private activeClient: WebSocket | null = null; // Single active connection
+    private readonly clients: Set<WebSocket>;
 
     constructor() {
         this.blobService = new BlobDataService();
-
-        // Create HTTP server
         this.server = http.createServer(this.handleHttpRequest.bind(this));
         this.wss = new WebSocketServer({server: this.server});
+        this.clients = new Set();
     }
 
     public run(): void {
@@ -30,24 +29,22 @@ export class BlobsWebsocket {
             const clientIp = request.socket.remoteAddress || "unknown";
 
             if (endpoint === BLOB_INFO_ENDPOINT) {
-                if (this.activeClient) {
-                    console.log(`Rejected additional connection from ${clientIp} on ${BLOB_INFO_ENDPOINT}`);
-                    ws.close(1008, 'Only one client allowed');
-                    return;
-                }
-
-                this.activeClient = ws;
-                console.log(`Client connected from ${clientIp} on ${BLOB_INFO_ENDPOINT}`);
+                this.clients.add(ws);
+                console.log(`Client connected from ${clientIp}. Total clients: ${this.clients.size}`);
 
                 ws.on('close', () => {
-                    console.log(`Client disconnected from ${clientIp}`);
-                    this.activeClient = null; // Reset to allow reconnection
+                    // Remove client on disconnect
+                    this.clients.delete(ws);
+                    console.log(`Client disconnected from ${clientIp}. Remaining clients: ${this.clients.size}`);
                 });
 
                 ws.on('error', (error) => {
                     console.error(`WebSocket error from ${clientIp}:`, error);
-                    this.activeClient = null; // Reset on error
-                    ws.close();
+                    // Remove client on error
+                    this.clients.delete(ws);
+                    if (ws.readyState !== WebSocket.CLOSED) {
+                        ws.close();
+                    }
                 });
             } else {
                 console.log(`Rejected connection from ${clientIp} to unknown endpoint ${endpoint}`);
@@ -63,15 +60,23 @@ export class BlobsWebsocket {
         provider.watchBlocks({
             includeTransactions: true,
             onBlock: async (block) => {
-                const result = await this.blobService.processBlock(block);
-                if (result.isFailure()) {
-                    console.error('Error processing block:', result.unwrapError());
-                    return;
-                }
+                try {
+                    const result = await this.blobService.processBlock(block);
+                    if (result.isFailure()) {
+                        console.error(`Error processing block ${block.number}:`, result.unwrapError().message);
+                        return;
+                    }
 
-                if (this.activeClient && this.activeClient.readyState === WebSocket.OPEN) {
                     const json = JSON.stringify(instanceToPlain(result.unwrap()), null, 2);
-                    this.activeClient.send(json);
+                    // Broadcast to all connected clients
+                    this.clients.forEach(client => {
+                        if (client.readyState === WebSocket.OPEN) {
+                            client.send(json);
+                        }
+                    });
+                } catch (error) {
+                    // Should not happen, but use try-catch to prevent crashing the server
+                    console.error('Unexpected error on block processing:', error);
                 }
             },
         });
@@ -93,7 +98,7 @@ export class BlobsWebsocket {
             const blocks = this.blobService.loadBlocksFromHistory();
             const json = JSON.stringify(instanceToPlain(blocks), null, 2);
 
-            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.writeHead(200, {'Content-Type': 'application/json'});
             res.end(json);
             return;
         }
@@ -105,10 +110,12 @@ export class BlobsWebsocket {
 
     private shutdown(): void {
         console.log('Shutting down server...');
-        if (this.activeClient) {
-            this.activeClient.close(1000, 'Server shutting down');
-            this.activeClient = null;
-        }
+        // Close all client connections
+        this.clients.forEach(client => {
+            client.close(1000, 'Server shutting down');
+        });
+        this.clients.clear();
+
         this.wss.close(() => {
             this.server.close(() => {
                 console.log('Server stopped');
