@@ -1,5 +1,5 @@
 import {pino} from 'pino';
-import {LOG_CONSOLE, LOG_FILE, LOG_LEVEL} from "./config.js";
+import {Config} from "./config.js";
 
 const streams = [
     {
@@ -7,7 +7,7 @@ const streams = [
         stream: pino.transport({
             target: 'pino-pretty',
             options: {
-                destination: LOG_FILE,
+                destination: Config.LOG_FILE,
                 sync: true, // Immediate flush for low-frequency logging, no buffering
                 mkdir: true,
                 colorize: false,
@@ -16,12 +16,12 @@ const streams = [
                 singleLine: true,
             },
         }),
-        level: LOG_LEVEL,
+        level: Config.LOG_LEVEL,
     },
 ];
 
 // Conditionally add console output
-if (LOG_CONSOLE) {
+if (Config.LOG_CONSOLE) {
     streams.push({
         // Console output with pretty printing
         stream: pino.transport({
@@ -33,7 +33,7 @@ if (LOG_CONSOLE) {
                 singleLine: true,
             },
         }),
-        level: LOG_LEVEL,
+        level: Config.LOG_LEVEL,
     });
 }
 

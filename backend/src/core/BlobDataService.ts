@@ -8,7 +8,7 @@ import {provider} from "../config/viem.js";
 import {BLOB_AGG_TX_GAS_USED_ESTIMATE, GAS_PER_BLOB} from "../config/constants.js";
 import {instanceToPlain, plainToInstance} from "class-transformer";
 import {BeaconBlobSidecarResponse} from "../api/models.js";
-import {HISTORY_FILE, HISTORY_RETENTION_SECONDS, NAMED_BLOB_SUBMITTERS_FILE} from "../config/config.js";
+import {Config} from "../config/config.js";
 import {resolve, dirname} from "path";
 import {logger} from "../config/logger.js";
 
@@ -28,7 +28,7 @@ export class BlobDataService {
     private senderReceiverToId: Map<string, bigint> = new Map();
 
     // File for storing historical block data, constrained by the HISTORY_RETENTION_SECONDS variable
-    private readonly historyFile = resolve(HISTORY_FILE);
+    private readonly historyFile = resolve(Config.HISTORY_FILE);
     private isHistoryDirInitialized = false;
 
     // Map of addresses to blob submitter labels
@@ -223,7 +223,7 @@ export class BlobDataService {
         blocks.push(blockWithBlobs);
 
         // Filter out blocks older than the retention threshold
-        const retentionThreshold = Date.now() / 1000 - HISTORY_RETENTION_SECONDS;
+        const retentionThreshold = Date.now() / 1000 - Config.HISTORY_RETENTION_SECONDS;
         const filteredBlocks = blocks.filter(block => block.blockTimestamp >= retentionThreshold);
 
         // Find removed blocks
@@ -247,11 +247,11 @@ export class BlobDataService {
      * @private
      */
     private loadNamedSubmitters(): Map<Address, string> {
-        if (!NAMED_BLOB_SUBMITTERS_FILE) {
+        if (!Config.NAMED_BLOB_SUBMITTERS_FILE) {
             return new Map();
         }
 
-        const addressConfig: AddressConfig = JSON.parse(readFileSync(NAMED_BLOB_SUBMITTERS_FILE, 'utf-8'));
+        const addressConfig: AddressConfig = JSON.parse(readFileSync(Config.NAMED_BLOB_SUBMITTERS_FILE, 'utf-8'));
         return new Map(
             addressConfig.submitters.flatMap(({name, addresses}) =>
                 addresses.map(address => [address, name])

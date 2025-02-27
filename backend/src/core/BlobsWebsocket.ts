@@ -1,6 +1,6 @@
 import {WebSocket, WebSocketServer} from 'ws';
 import {BlobDataService, NoBlobTransactionsError} from "./BlobDataService.js";
-import {PORT} from "../config/config.js";
+import {Config} from "../config/config.js";
 import {provider} from "../config/viem.js";
 import {instanceToPlain} from "class-transformer";
 import * as http from 'http';
@@ -14,6 +14,7 @@ export class BlobsWebsocket {
     private readonly wss: WebSocketServer;
     private readonly server: http.Server;
     private readonly clients: Set<WebSocket>;
+    private readonly port = Config.PORT
 
     constructor() {
         this.blobService = new BlobDataService();
@@ -89,8 +90,8 @@ export class BlobsWebsocket {
         });
 
         // Start the server
-        this.server.listen(PORT, () => {
-            logger.info(`WebSocket and HTTP server started on http://localhost:${PORT} and ws://localhost:${PORT}`);
+        this.server.listen(this.port, () => {
+            logger.info(`WebSocket and HTTP server started on http://localhost:${this.port} and ws://localhost:${this.port}`);
         });
 
         // Graceful shutdown
