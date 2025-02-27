@@ -31,7 +31,7 @@ const BlobCard: React.FC<BlobCardProps> = ({blob}) => {
                 <div className="blob-unfilled" style={{width: `${100 - blob.filled}%`}}></div>
             </div>
             <div className="blob-info">
-                <small>Name: <b>{blob.name}</b>, Fee: <b>{blob.blob_fee}</b> gwei,
+                <small>Sender: <b>{blob.name}</b>, Fee: <b>{blob.blob_fee}</b> gwei,
                     Age: <b>{lastBlockNumber - blob.blockReceived}</b> block(s)</small>
             </div>
         </motion.div>

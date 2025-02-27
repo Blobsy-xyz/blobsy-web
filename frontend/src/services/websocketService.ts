@@ -41,8 +41,10 @@ class WebSocketService {
     private socket: WebSocket | null = null;
 
     connect() {
-//        this.socket = new WebSocket('ws://localhost:9933/blob-info');
-        this.socket = new WebSocket('wss://blobsy.kriptal.io/ws');
+        // Use environment variable with fallback for development
+        const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:9933/blob-info';
+        this.socket = new WebSocket(wsUrl);
+        console.log('Connecting to WebSocket server...', wsUrl);
         this.socket.onopen = () => console.log('Connected to WebSocket server.');
         this.socket.onmessage = (event) => {
             try {
