@@ -1,4 +1,4 @@
-import {existsSync, readFileSync, writeFileSync} from "fs";
+import {existsSync, mkdirSync, readFileSync, writeFileSync} from "fs";
 import {Address, Block, TransactionEIP4844} from "viem";
 import {AddressConfig, BlobInfo, BlockWithBlobs} from "./types.js";
 import {failure, Result, success} from "./result.js";
@@ -9,16 +9,29 @@ import {BLOB_AGG_TX_GAS_USED_ESTIMATE, GAS_PER_BLOB} from "../config/constants.j
 import {instanceToPlain, plainToInstance} from "class-transformer";
 import {BeaconBlobSidecarResponse} from "../api/models.js";
 import {HISTORY_FILE, HISTORY_RETENTION_SECONDS, NAMED_BLOB_SUBMITTERS_FILE} from "../config/config.js";
-import {resolve} from "path";
+import {resolve, dirname} from "path";
+import {logger} from "../config/logger.js";
 
 const BLOB_SIDECAR_RETRY_INTERVAL_MS = 1000;
 const BLOB_SIDECAR_MAX_ATTEMPTS = 5;
+
+export class NoBlobTransactionsError extends Error {
+    constructor() {
+        super('Waiting for blob transactions to estimate blob fee: no historical blob data in recent blocks yet.');
+        this.name = this.constructor.name;
+    }
+}
 
 export class BlobDataService {
     // Store the latest average blob fee to estimate the next blob fee even when the current block does not have any blob transactions
     private latestAvgBlobFee: bigint = -1n;
     private senderReceiverToId: Map<string, bigint> = new Map();
+
+    // File for storing historical block data, constrained by the HISTORY_RETENTION_SECONDS variable
     private readonly historyFile = resolve(HISTORY_FILE);
+    private isHistoryDirInitialized = false;
+
+    // Map of addresses to blob submitter labels
     private readonly namedAddresses = this.loadNamedSubmitters();
 
     // Caches the last block number to prevent duplicate processing as a safeguard
@@ -40,7 +53,7 @@ export class BlobDataService {
      * @returns {@link BlockWithBlobs} {@link Result} or an error.
      */
     public async processBlock(block: Block): Promise<Result<BlockWithBlobs, Error>> {
-        console.log(`Processing block ${block.number}`);
+        logger.info(`Processing block ${block.number}`);
 
         // Validate block
         if (this.previousBlock === block.number) {
@@ -145,7 +158,7 @@ export class BlobDataService {
             // Consider using `baseFeePerBlobGas` and `blobGasUsedRatio` from `eth_feeHistory` for calculation.
             // This requires a custom `getFeeHistory` implementation since the Viem client doesn't support full data retrieval.
             // See: https://github.com/wevm/viem/blob/c19ba8d7c572aa8ea19c8616799d1db8675cf11d/src/types/fee.ts#L3
-            return failure(new Error('Cannot calculate average blob fee: no blob transactions found in recent blocks. Waiting for the block with blob transactions...'));
+            return failure(new NoBlobTransactionsError());
         }
 
         const blockWithBlobs = new BlockWithBlobs(block.number, block.timestamp, this.latestAvgBlobFee, medianExecutionFeeEstimate, blobInfos);
@@ -160,7 +173,7 @@ export class BlobDataService {
      */
     public loadBlocksFromHistory(): BlockWithBlobs[] {
         if (!existsSync(this.historyFile)) {
-            console.log(`History file ${this.historyFile} does not exist, returning empty array`);
+            logger.info(`History file ${this.historyFile} does not exist, returning empty array`);
             return [];
         }
 
@@ -168,7 +181,7 @@ export class BlobDataService {
             const rawData = readFileSync(this.historyFile, 'utf-8');
             return plainToInstance(BlockWithBlobs, JSON.parse(rawData)) as BlockWithBlobs[];
         } catch (error) {
-            console.error(`Failed to load history from ${this.historyFile}:`, error);
+            logger.error(error, `Failed to load history from ${this.historyFile}`);
             return [];
         }
     }
@@ -181,7 +194,7 @@ export class BlobDataService {
                 return success(blobSidecarsResult.unwrap());
             }
 
-            console.warn(`Failed to fetch blob sidecars. Retrying (attempt ${attempt} in ${BLOB_SIDECAR_RETRY_INTERVAL_MS} ms):`, blobSidecarsResult.unwrapError());
+            logger.warn(`Failed to fetch blob sidecars. Retrying (attempt ${attempt} in ${BLOB_SIDECAR_RETRY_INTERVAL_MS} ms):`, blobSidecarsResult.unwrapError());
 
             if (attempt < BLOB_SIDECAR_MAX_ATTEMPTS) {
                 await new Promise(resolve => setTimeout(resolve, BLOB_SIDECAR_RETRY_INTERVAL_MS));
@@ -206,7 +219,7 @@ export class BlobDataService {
             : [];
 
         // Add the new block to the list
-        console.log(`Adding block to history: ${blockWithBlobs.blockNumber}`);
+        logger.info(`Adding block to history: ${blockWithBlobs.blockNumber}`);
         blocks.push(blockWithBlobs);
 
         // Filter out blocks older than the retention threshold
@@ -216,11 +229,16 @@ export class BlobDataService {
         // Find removed blocks
         const removedBlocks = blocks.filter(block => block.blockTimestamp < retentionThreshold);
         if (removedBlocks.length > 0) {
-            console.log("Removed blocks:", removedBlocks.map(block => block.blockNumber).join(", "));
+            logger.info("Removed blocks:", removedBlocks.map(block => block.blockNumber).join(", "));
         }
 
         // Serialize the filtered blocks back to the history file
         const plainObject = instanceToPlain(filteredBlocks);
+
+        if (!this.isHistoryDirInitialized) {
+            mkdirSync(dirname(this.historyFile), {recursive: true});
+            this.isHistoryDirInitialized = true;
+        }
         writeFileSync(this.historyFile, JSON.stringify(plainObject, null, 2), "utf-8");
     }
 

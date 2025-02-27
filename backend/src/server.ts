@@ -1,8 +1,9 @@
-// reflect-metadata import is necessary for class-transformer decorators to work.
+// Reflect-metadata import is necessary for class-transformer decorators to work.
 // It should be imported once in the main file of the project.
 import "reflect-metadata";
 
 import {BlobsWebsocket} from "./core/BlobsWebsocket.js";
+import {logger} from "./config/logger.js";
 
 async function startServer() {
     const server = new BlobsWebsocket();
@@ -10,5 +11,5 @@ async function startServer() {
 }
 
 startServer().catch(error => {
-    console.error('Failed to start server:', error);
+    logger.fatal(error, 'Failed to start server:');
 });

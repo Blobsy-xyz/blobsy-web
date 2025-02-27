@@ -1,9 +1,10 @@
 import {WebSocket, WebSocketServer} from 'ws';
-import {BlobDataService} from "./BlobDataService.js";
+import {BlobDataService, NoBlobTransactionsError} from "./BlobDataService.js";
 import {PORT} from "../config/config.js";
 import {provider} from "../config/viem.js";
 import {instanceToPlain} from "class-transformer";
 import * as http from 'http';
+import {logger} from "../config/logger.js";
 
 const BLOB_INFO_ENDPOINT = '/blob-info';
 const BLOB_INFO_HISTORY_ENDPOINT = '/blob-info-history';
@@ -22,7 +23,7 @@ export class BlobsWebsocket {
     }
 
     public run(): void {
-        console.log('Starting Blobs websocket server');
+        logger.info('Starting Blobs websocket server');
 
         this.wss.on('connection', (ws, request) => {
             const endpoint = request.url;
@@ -30,16 +31,16 @@ export class BlobsWebsocket {
 
             if (endpoint === BLOB_INFO_ENDPOINT) {
                 this.clients.add(ws);
-                console.log(`Client connected from ${clientIp}. Total clients: ${this.clients.size}`);
+                logger.info(`Client connected from ${clientIp}. Total clients: ${this.clients.size}`);
 
                 ws.on('close', () => {
                     // Remove client on disconnect
                     this.clients.delete(ws);
-                    console.log(`Client disconnected from ${clientIp}. Remaining clients: ${this.clients.size}`);
+                    logger.info(`Client disconnected from ${clientIp}. Remaining clients: ${this.clients.size}`);
                 });
 
                 ws.on('error', (error) => {
-                    console.error(`WebSocket error from ${clientIp}:`, error);
+                    logger.error(error, `WebSocket error from ${clientIp}`);
                     // Remove client on error
                     this.clients.delete(ws);
                     if (ws.readyState !== WebSocket.CLOSED) {
@@ -47,13 +48,13 @@ export class BlobsWebsocket {
                     }
                 });
             } else {
-                console.log(`Rejected connection from ${clientIp} to unknown endpoint ${endpoint}`);
+                logger.info(`Rejected connection from ${clientIp} to unknown endpoint ${endpoint}`);
                 ws.close(4000, 'Invalid endpoint');
             }
         });
 
         this.wss.on('error', (error) => {
-            console.error('WebSocket server error:', error);
+            logger.error(error, 'WebSocket server error');
         });
 
         // Subscribe to new blocks
@@ -62,28 +63,34 @@ export class BlobsWebsocket {
             onBlock: async (block) => {
                 try {
                     const result = await this.blobService.processBlock(block);
-                    if (result.isFailure()) {
-                        console.error(`Error processing block ${block.number}:`, result.unwrapError().message);
+
+                    if (result.isSuccess()) {
+                        const json = JSON.stringify(instanceToPlain(result.unwrap()), null, 2);
+                        // Broadcast to all connected clients
+                        this.clients.forEach(client => {
+                            if (client.readyState === WebSocket.OPEN) {
+                                client.send(json);
+                            }
+                        });
                         return;
                     }
 
-                    const json = JSON.stringify(instanceToPlain(result.unwrap()), null, 2);
-                    // Broadcast to all connected clients
-                    this.clients.forEach(client => {
-                        if (client.readyState === WebSocket.OPEN) {
-                            client.send(json);
-                        }
-                    });
+                    const error = result.unwrapError();
+                    if (error instanceof NoBlobTransactionsError) {
+                        logger.warn(error.message);
+                        return;
+                    }
+                    logger.error(error, `Error processing block ${block.number}`);
                 } catch (error) {
                     // Should not happen, but use try-catch to prevent crashing the server
-                    console.error('Unexpected error on block processing:', error);
+                    logger.error(error, 'Unexpected error on block processing:');
                 }
             },
         });
 
         // Start the server
         this.server.listen(PORT, () => {
-            console.log(`WebSocket and HTTP server started on http://localhost:${PORT} and ws://localhost:${PORT}`);
+            logger.info(`WebSocket and HTTP server started on http://localhost:${PORT} and ws://localhost:${PORT}`);
         });
 
         // Graceful shutdown
@@ -93,7 +100,7 @@ export class BlobsWebsocket {
 
     private handleHttpRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
         if (req.url === BLOB_INFO_HISTORY_ENDPOINT && req.method === 'GET') {
-            console.log(`Received request to ${BLOB_INFO_HISTORY_ENDPOINT} endpoint from ${req.socket.remoteAddress}`);
+            logger.info(`Received request to ${BLOB_INFO_HISTORY_ENDPOINT} endpoint from ${req.socket.remoteAddress}`);
 
             const blocks = this.blobService.loadBlocksFromHistory();
             const json = JSON.stringify(instanceToPlain(blocks), null, 2);
@@ -103,13 +110,13 @@ export class BlobsWebsocket {
             return;
         }
 
-        console.log(`Received request to unknown endpoint ${req.url}`);
+        logger.info(`Received request to unknown endpoint ${req.url}`);
         res.writeHead(404, {'Content-Type': 'text/plain'});
         res.end('Not Found\n');
     }
 
     private shutdown(): void {
-        console.log('Shutting down server...');
+        logger.info('Shutting down server...');
         // Close all client connections
         this.clients.forEach(client => {
             client.close(1000, 'Server shutting down');
@@ -118,7 +125,7 @@ export class BlobsWebsocket {
 
         this.wss.close(() => {
             this.server.close(() => {
-                console.log('Server stopped');
+                logger.info('Server stopped');
                 process.exit(0);
             });
         });

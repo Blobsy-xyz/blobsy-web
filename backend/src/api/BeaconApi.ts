@@ -2,6 +2,7 @@ import {AxiosInstance} from "axios";
 import {failure, Result, success} from "../core/result.js";
 import {plainToInstance} from "class-transformer";
 import {BeaconBlobSidecarResponse} from "./models.js";
+import {logger} from "../config/logger.js";
 
 /**
  * Beacon API client.
@@ -36,7 +37,7 @@ export class BeaconApi {
                 return success(beaconBlobSidecars);
             })
             .catch((error) => {
-                console.log(error);
+                logger.error(error, "Failed to fetch blob sidecars");
                 return failure(new Error(`Failed to fetch blob sidecars for block ${blockId}: ${error.response.status} - ${error.response.statusText}`));
             });
     }
