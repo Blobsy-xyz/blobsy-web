@@ -37,6 +37,9 @@ export class BlobDataService {
     // Caches the last block number to prevent duplicate processing as a safeguard
     private previousBlock = 0n;
 
+    // Cache of historical blocks with blobs
+    private historyCache: BlockWithBlobs[] | null = null;
+
     /**
      * Processes a block with EIP-4844 blob transactions:
      *  - For each blob sidecar calculates:
@@ -172,16 +175,23 @@ export class BlobDataService {
      * @returns Array of all BlockWithBlobs from the history file.
      */
     public loadBlocksFromHistory(): BlockWithBlobs[] {
+        if (this.historyCache !== null) {
+            return this.historyCache;
+        }
+
         if (!existsSync(this.historyFile)) {
-            logger.info(`History file ${this.historyFile} does not exist, returning empty array`);
-            return [];
+            logger.debug(`History file ${this.historyFile} does not exist, returning empty array`);
+            this.historyCache = [];
+            return this.historyCache;
         }
 
         try {
             const rawData = readFileSync(this.historyFile, 'utf-8');
-            return plainToInstance(BlockWithBlobs, JSON.parse(rawData)) as BlockWithBlobs[];
+            this.historyCache = plainToInstance(BlockWithBlobs, JSON.parse(rawData)) as BlockWithBlobs[];
+            return this.historyCache
         } catch (error) {
             logger.error(error, `Failed to load history from ${this.historyFile}`);
+            this.historyCache = null;
             return [];
         }
     }
@@ -231,6 +241,9 @@ export class BlobDataService {
         if (removedBlocks.length > 0) {
             logger.info("Removed blocks:", removedBlocks.map(block => block.blockNumber).join(", "));
         }
+
+        // update the history cache
+        this.historyCache = filteredBlocks;
 
         // Serialize the filtered blocks back to the history file
         const plainObject = instanceToPlain(filteredBlocks);
