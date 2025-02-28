@@ -1,69 +1,59 @@
 import {config} from "dotenv";
-import {dirname, resolve} from "path";
+import {resolve, dirname} from "path";
 import {existsSync} from "fs";
 import {fileURLToPath} from "node:url";
+import {z} from "zod";
+import {BLOB_AGG_TX_GAS_USED_ESTIMATE} from "./constants.js";
 
 // Resolve .env path and load it
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename)
+const __dirname = dirname(__filename);
 const envPath = resolve(__dirname, "../../.env");
-const dotenvResult = config({ path: envPath });
+const dotenvResult = config({path: envPath});
 if (dotenvResult.error) {
     throw new Error(`Failed to load .env file: ${dotenvResult.error.message}`);
 }
 
-// Helper functions
-function getEnvVariable(envName: string): string {
-    const value = process.env[envName];
-    if (!value) {
-        throw new Error(`Environment variable ${envName} is required but not defined`);
-    }
-    return value;
-}
+// Define schema with zod
+const envSchema = z.object({
+    NODE_WS_URL: z.string().url().nonempty({message: "Must be a valid non-empty URL"}),
+    BEACON_API: z.string().url().nonempty({message: "Must be a valid non-empty URL"}),
+    PORT: z.coerce.number().int().min(1).max(65535, {message: "Must be between 1 and 65535"}).default(9933),
+    HISTORY_FILE: z.string().min(1, {message: "History file must not be an empty string."}).default('output/blocks.json'),
+    HISTORY_RETENTION_SECONDS: z.coerce.number().int().min(1, {message: "History retention must be greater than 0"}).default(3600),
+    NAMED_BLOB_SUBMITTERS_FILE: z.string().min(1, { message: "Blob submitters file must not be an empty string" })
+        .default('assets/blob-submitters.json')
+        .refine(
+            val => existsSync(resolve(val)),
+            { message: "Blob submitters file must exist at the specified path" }
+        ),
+    AGGREGATOR_REWARD_PERCENTILE: z.coerce.number().int().min(1).max(100).default(20),
+    BLOB_AGG_TX_GAS_USED_ESTIMATE: z.coerce.bigint().min(0n).default(BLOB_AGG_TX_GAS_USED_ESTIMATE),
+    LOG_FILE: z.string().min(1, {message: "Log file must not be an empty string"}).default('logs/app.log'),
+    LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
+    LOG_CONSOLE: z.coerce.boolean().default(false),
+});
 
-function getEnvNumber(envName: string, defaultValue: number): number {
-    const value = process.env[envName] || String(defaultValue);
-    const parsed = parseInt(value, 10);
-    if (isNaN(parsed)) {
-        console.warn(`Invalid number for ${envName}="${value}", defaulting to ${defaultValue}`);
-        return defaultValue;
-    }
-    return parsed;
-}
-
-function validateEnvFilepath(envName: string, defaultPath: string): string {
-    const filepath = process.env[envName] || defaultPath;
-    const resolvedPath = resolve(filepath);
-    if (!existsSync(resolvedPath)) {
-        console.warn(`File not found at path "${resolvedPath}" for env ${envName}, defaulting to "${defaultPath}"`);
-        return defaultPath;
-    }
-    return filepath;
-}
-
-// NOTE: Logging configuration is included in a centralized config file to simplify .env variable loading
-// Valid log levels for Pino
-const VALID_LOG_LEVELS = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'] as const;
-type LogLevel = typeof VALID_LOG_LEVELS[number];
-
-function validateLogLevel(level: string | undefined): LogLevel {
-    if (!level || !VALID_LOG_LEVELS.includes(level as LogLevel)) {
-        console.warn(`Invalid or no log level "${level}", defaulting to "info"`);
-        return 'info';
-    }
-    console.info(`Log level set to "${level}"`);
-    return level as LogLevel;
-}
-
-// Centralized config object
+// Validate and resolve paths for file-based vars
+const env = envSchema.parse(process.env);
 export const Config = {
-    NODE_WS_URL: getEnvVariable('NODE_WS_URL'),
-    BEACON_API: getEnvVariable('BEACON_API'),
-    PORT: getEnvNumber('PORT', 9933),
-    HISTORY_FILE: resolve(process.env.HISTORY_FILE || 'output/blocks.json'),
-    HISTORY_RETENTION_SECONDS: getEnvNumber('HISTORY_RETENTION_SECONDS', 3600),
-    NAMED_BLOB_SUBMITTERS_FILE: validateEnvFilepath('NAMED_BLOB_SUBMITTERS_FILE', 'assets/blob-submitters.json'),
-    LOG_FILE: resolve(process.env.LOG_FILE || 'logs/app.log'),
-    LOG_LEVEL: validateLogLevel(process.env.LOG_LEVEL),
-    LOG_CONSOLE: (process.env.LOG_CONSOLE?.toLowerCase() ?? 'false') === 'true',
-} as const; // `as const` for readonly type inference
+    NODE_WS_URL: env.NODE_WS_URL,
+    BEACON_API: env.BEACON_API,
+    PORT: env.PORT,
+    HISTORY_FILE: resolve(env.HISTORY_FILE),
+    HISTORY_RETENTION_SECONDS: env.HISTORY_RETENTION_SECONDS,
+    NAMED_BLOB_SUBMITTERS_FILE: resolve(env.NAMED_BLOB_SUBMITTERS_FILE),
+    AGGREGATOR_REWARD_PERCENTILE: env.AGGREGATOR_REWARD_PERCENTILE,
+    BLOB_AGG_TX_GAS_USED_ESTIMATE: env.BLOB_AGG_TX_GAS_USED_ESTIMATE,
+    LOG_FILE: resolve(env.LOG_FILE),
+    LOG_LEVEL: env.LOG_LEVEL,
+    LOG_CONSOLE: env.LOG_CONSOLE,
+} as const;
+
+// On startup print all env parameters to console, excluding sensitive ones
+console.log('Environment parameters loaded on startup:');
+Object.entries(Config).forEach(([key, value]) => {
+    if (key !== 'NODE_WS_URL' && key !== 'BEACON_API') {
+        console.info(`${key}: ${value}`);
+    }
+});

@@ -5,11 +5,11 @@ import {failure, Result, success} from "./result.js";
 import {beaconClient} from "../api/axios.js";
 import {getMedianFee, isTransactionArray, timestampToSlotNumber} from "./utils.js";
 import {provider} from "../config/viem.js";
-import {BLOB_AGG_TX_GAS_USED_ESTIMATE, GAS_PER_BLOB} from "../config/constants.js";
+import {GAS_PER_BLOB} from "../config/constants.js";
 import {instanceToPlain, plainToInstance} from "class-transformer";
 import {BeaconBlobSidecarResponse} from "../api/models.js";
 import {Config} from "../config/config.js";
-import {resolve, dirname} from "path";
+import {dirname, resolve} from "path";
 import {logger} from "../config/logger.js";
 
 const BLOB_SIDECAR_RETRY_INTERVAL_MS = 1000;
@@ -144,12 +144,12 @@ export class BlobDataService {
         }
 
         // Estimate the blob aggregator execution fee using the next base fee and the median 20th percentile reward from the last 10 blocks
-        const feeInfoResult = await getMedianFee(provider);
+        const feeInfoResult = await getMedianFee(provider, 10, Config.AGGREGATOR_REWARD_PERCENTILE);
         if (feeInfoResult.isFailure()) {
             return failure(new Error(`Failed to fetch median fee: ${feeInfoResult.unwrapError()}`));
         }
         const medianFeeInfo = feeInfoResult.unwrap();
-        const medianExecutionFeeEstimate = medianFeeInfo.gasFeeCap * BLOB_AGG_TX_GAS_USED_ESTIMATE;
+        const medianExecutionFeeEstimate = medianFeeInfo.gasFeeCap * Config.BLOB_AGG_TX_GAS_USED_ESTIMATE;
 
         // Compute the average blob fee for the current block if it contains blob transactions
         if (blobFees.length > 0) {
