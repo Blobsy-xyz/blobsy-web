@@ -15,9 +15,9 @@ import {logger} from "../config/logger.js";
 const BLOB_SIDECAR_RETRY_INTERVAL_MS = 1000;
 const BLOB_SIDECAR_MAX_ATTEMPTS = 5;
 
-export class NoBlobTransactionsError extends Error {
-    constructor() {
-        super('Waiting for blob transactions to estimate blob fee: no historical blob data in recent blocks yet.');
+export class BlockProcessingWarning extends Error {
+    constructor(message: string) {
+        super(message);
         this.name = this.constructor.name;
     }
 }
@@ -58,13 +58,19 @@ export class BlobDataService {
     public async processBlock(block: Block): Promise<Result<BlockWithBlobs, Error>> {
         logger.info(`Processing block ${block.number}`);
 
-        // Validate block
-        if (this.previousBlock === block.number) {
-            return failure(new Error(`Block ${block.number} already processed`));
-        }
         if (block.number == null) {
             return failure(new Error('Block number is null'));
         }
+
+        // Validate block
+        if (this.previousBlock === block.number) {
+            return failure(new BlockProcessingWarning(`Skipping already processed block ${block.number}.`));
+        }
+        if (this.previousBlock !== 0n && this.previousBlock + 1n !== block.number) {
+            logger.warn(`Missed block ${this.previousBlock + 1n} after processing ${this.previousBlock}`);
+        }
+        this.previousBlock = block.number
+
         if (!isTransactionArray(block.transactions)) {
             return failure(new Error('Block does not have full info about transactions. Include "includeTransactions: true" when fetching the block'));
         }
@@ -161,7 +167,7 @@ export class BlobDataService {
             // Consider using `baseFeePerBlobGas` and `blobGasUsedRatio` from `eth_feeHistory` for calculation.
             // This requires a custom `getFeeHistory` implementation since the Viem client doesn't support full data retrieval.
             // See: https://github.com/wevm/viem/blob/c19ba8d7c572aa8ea19c8616799d1db8675cf11d/src/types/fee.ts#L3
-            return failure(new NoBlobTransactionsError());
+            return failure(new BlockProcessingWarning("Waiting for blob transactions to estimate blob fee: no historical blob data in recent blocks yet."));
         }
 
         const blockWithBlobs = new BlockWithBlobs(block.number, block.timestamp, this.latestAvgBlobFee, medianExecutionFeeEstimate, blobInfos);

@@ -1,5 +1,5 @@
 import {WebSocket, WebSocketServer} from 'ws';
-import {BlobDataService, NoBlobTransactionsError} from "./BlobDataService.js";
+import {BlobDataService, BlockProcessingWarning} from "./BlobDataService.js";
 import {Config} from "../config/config.js";
 import {provider} from "../config/viem.js";
 import {instanceToPlain} from "class-transformer";
@@ -77,7 +77,7 @@ export class BlobsWebsocket {
                     }
 
                     const error = result.unwrapError();
-                    if (error instanceof NoBlobTransactionsError) {
+                    if (error instanceof BlockProcessingWarning) {
                         logger.warn(error.message);
                         return;
                     }
