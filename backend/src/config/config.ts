@@ -5,19 +5,16 @@ import {fileURLToPath} from "node:url";
 import {z} from "zod";
 import {BLOB_AGG_TX_GAS_USED_ESTIMATE} from "./constants.js";
 
-// Resolve .env path and load it
+// Resolve optional .env path and load it
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const envPath = resolve(__dirname, "../../.env");
-const dotenvResult = config({path: envPath});
-if (dotenvResult.error) {
-    throw new Error(`Failed to load .env file: ${dotenvResult.error.message}`);
-}
+config({path: envPath});
 
 // Define schema with zod
 const envSchema = z.object({
-    NODE_WS_URL: z.string().url().nonempty({message: "Must be a valid non-empty URL"}),
-    BEACON_API: z.string().url().nonempty({message: "Must be a valid non-empty URL"}),
+    NODE_WS_URL: z.string().url().min(1).default("https://ethereum-rpc.publicnode.com"),
+    BEACON_API: z.string().url().min(1).default("https://ethereum-beacon-api.publicnode.com"),
     PORT: z.coerce.number().int().min(1).max(65535, {message: "Must be between 1 and 65535"}).default(9933),
     HISTORY_FILE: z.string().min(1, {message: "History file must not be an empty string."}).default('output/blocks.json'),
     HISTORY_RETENTION_SECONDS: z.coerce.number().int().min(1, {message: "History retention must be greater than 0"}).default(3600),
@@ -31,7 +28,7 @@ const envSchema = z.object({
     BLOB_AGG_TX_GAS_USED_ESTIMATE: z.coerce.bigint().min(0n).default(BLOB_AGG_TX_GAS_USED_ESTIMATE),
     LOG_FILE: z.string().min(1, {message: "Log file must not be an empty string"}).default('logs/app.log'),
     LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
-    LOG_CONSOLE: z.coerce.boolean().default(false),
+    LOG_CONSOLE: z.coerce.boolean().default(true),
 });
 
 // Validate and resolve paths for file-based vars
@@ -51,7 +48,7 @@ export const Config = {
 } as const;
 
 // On startup print all env parameters to console, excluding sensitive ones
-console.log('Environment parameters loaded on startup:');
+console.log('Environment parameters loaded on startup (excluding possibly sensitive NODE_WS_URL and BEACON_API):');
 Object.entries(Config).forEach(([key, value]) => {
     if (key !== 'NODE_WS_URL' && key !== 'BEACON_API') {
         console.info(`${key}: ${value}`);

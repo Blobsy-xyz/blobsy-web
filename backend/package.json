@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "nodemon --watch src --ext ts --exec tsx src/server.ts"
+    "dev": "nodemon --watch src --ext ts --exec tsx src/server.ts",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
   },
   "keywords": [],
   "author": "",

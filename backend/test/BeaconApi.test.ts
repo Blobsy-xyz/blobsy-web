@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import {hexToBytes} from "viem";
 import {plainToInstance} from "class-transformer";
 import {success} from "../src/core/result.js";
@@ -5,6 +6,7 @@ import {BeaconBlobSidecar, BeaconBlobSidecarResponse} from "../src/api/models.js
 import {BeaconApi} from "../src/api/BeaconApi.js";
 import axios from "axios";
 
+// NOTE: If we were to use required .env variables, we should mock them before importing BeaconApi
 describe("BeaconApi Unit Tests", () => {
     test("getBlobVersionedHash should calculate the blob versioned hash correctly", async () => {
         const blobMock = new BeaconBlobSidecar(

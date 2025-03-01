@@ -6,34 +6,34 @@ The service processes blocks with EIP-4844 blob transactions, calculates all nec
 - Estimates the next blob fee based on the average blob fee of the latest block with blobs.
 - Estimates blob aggregator transaction execution fees using median gas fees and a conservative gas usage estimate, based on Dune query data on blob submitter gas usage (see [average gas usage](https://dune.com/queries/4711922/7831269) and [gas distribution](https://dune.com/queries/4712158/7831324)).
 - Enriches blob transaction data with submitter labels fetched from a Dune query ([Naming blob submitters](https://dune.com/queries/4706345/7822539)), associating addresses with their respective submitter identities.
-- Persists processed block data, including blob details, to a history file for later retrieval via additional http endpoint.
+- Persists processed block data, including blob details, to a history file for later retrieval via additional HTTP endpoint.
 
-# Setup instructions
-### 1. Install dependencies
+# Setup Instructions
+### 1. Install Dependencies
 In `backend/` run `npm install`
 
 ### 2. Compile TypeScript
 If not running in development mode, compile TypeScript to JavaScript by running `npm run build`.
 
-### 3. Set up environment variables
-Copy the `.env.example` file to `.env` and fill in the necessary values. See the [Environment variables](#environment-variables) section for more information.
+### 3. Set up Environment Variables (optional)
+Optionally copy the `.env.example` file to `.env` and customize values if desired. Defaults are used if not specified. See the [Environment Variables](#environment-variables) section for details and validation rules.
 
-### 4. Start the backend service
+### 4. Start the Backend Service
 In `backend/` run `npm start` or `npm run dev` for development mode.
 Development mode will automatically restart the service when source code changes are detected.
 
-## Environment Variables
-The backend uses the following environment variables, defined in `.env`. Refer to `.env.example` for a template.
+### Tests
+To run tests, use `npm test`.
 
-### Required Configuration
+## Environment Variables
+All environment variables are optional and defined in `.env`. Defaults are used if not specified. Copy `.env.example` to `.env` and customize as needed. See below for details and validation rules.
+
 - `NODE_WS_URL`
-  - **Description**: WebSocket URL for connecting to an Ethereum node.
-  - **Default**: None
+  - **Description**: WebSocket URL for connecting to an Ethereum node. Keep in mind that the public node is not 100% reliable. Sometimes a block is missed or duplicated.
+  - **Default**: `https://ethereum-rpc.publicnode.com`
 - `BEACON_API`
   - **Description**: Ethereum Beacon Chain API endpoint.
-  - **Default**: None
-
-### Optional Configuration
+  - **Default**: `https://ethereum-beacon-api.publicnode.com`
 - `PORT`
   - **Description**: Port number for the backend server to listen on. Must be an integer between 1 and 65535.
   - **Default**: `9933`
@@ -56,7 +56,7 @@ The backend uses the following environment variables, defined in `.env`. Refer t
 ### Logging Configuration
 - `LOG_CONSOLE`
   - **Description**: Enables or disables console logging alongside file output.
-  - **Default**: `false`
+  - **Default**: `true`
 - `LOG_LEVEL`
   - **Description**: Sets the logging level for Pino.
   - **Default**: `info`
