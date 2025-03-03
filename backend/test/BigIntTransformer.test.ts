@@ -12,7 +12,7 @@ class TestClass {
 
 describe('BigIntTransformer', () => {
     it('should serialize BigInt to string', () => {
-        const testObject = new TestClass(BigInt(123));
+        const testObject = new TestClass(123n);
         const plainObject = instanceToPlain(testObject);
         expect(plainObject.num).toBe('123');
     });
@@ -20,6 +20,6 @@ describe('BigIntTransformer', () => {
     it('should deserialize string to BigInt', () => {
         const plainObject = {num: '123'};
         const testObject = plainToClass(TestClass, plainObject);
-        expect(testObject.num).toBe(BigInt(123));
+        expect(testObject.num).toBe(123n);
     });
 });

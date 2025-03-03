@@ -45,9 +45,6 @@ export class BlobInfo {
     to: Address | null;
     blobVersionedHash: string;
 
-    @BigIntTransformer()
-    blobSize: bigint;
-
     /**
      * Blob data size excluding trailing zero 32-byte chunks
      */
@@ -73,7 +70,6 @@ export class BlobInfo {
         fromName: string,
         to: Address | null,
         blobVersionedHash: string,
-        blobSize: bigint,
         actualBlobSize: bigint,
         blobFee: bigint,
         executionTxFee: bigint
@@ -84,7 +80,6 @@ export class BlobInfo {
         this.fromName = fromName;
         this.to = to;
         this.blobVersionedHash = blobVersionedHash;
-        this.blobSize = blobSize;
         this.actualBlobSize = actualBlobSize;
         this.blobFee = blobFee;
         this.executionTxFee = executionTxFee;

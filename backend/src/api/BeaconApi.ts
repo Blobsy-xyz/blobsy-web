@@ -38,7 +38,7 @@ export class BeaconApi {
             })
             .catch((error) => {
                 logger.error(error, "Failed to fetch blob sidecars");
-                return failure(new Error(`Failed to fetch blob sidecars for block ${blockId}: ${error.response.status} - ${error.response.statusText}`));
+                return failure(new Error(`Failed to fetch blob sidecars for block ${blockId}: ${error}`));
             });
     }
 }

@@ -19,8 +19,8 @@ If not running in development mode, compile TypeScript to JavaScript by running 
 Optionally copy the `.env.example` file to `.env` and customize values if desired. Defaults are used if not specified. See the [Environment Variables](#environment-variables) section for details and validation rules.
 
 ### 4. Start the Backend Service
-In `backend/` run `npm start` or `npm run dev` for development mode.
-Development mode will automatically restart the service when source code changes are detected.
+In `backend/`, run `npm start` or `npm run dev` to start development mode,
+which restarts the service automatically on source code changes.
 
 ### Tests
 To run tests, use `npm test`.
@@ -29,8 +29,8 @@ To run tests, use `npm test`.
 All environment variables are optional and defined in `.env`. Defaults are used if not specified. Copy `.env.example` to `.env` and customize as needed. See below for details and validation rules.
 
 - `NODE_WS_URL`
-  - **Description**: WebSocket URL for connecting to an Ethereum node. Keep in mind that the public node is not 100% reliable. Sometimes a block is missed or duplicated.
-  - **Default**: `https://ethereum-rpc.publicnode.com`
+  - **Description**: WebSocket URL for connecting to an Ethereum node.
+  - **Default**: `https://ethereum-rpc.publicnode.com` - Keep in mind that the public node is not 100% reliable. Sometimes a block is missed or duplicated.
 - `BEACON_API`
   - **Description**: Ethereum Beacon Chain API endpoint.
   - **Default**: `https://ethereum-beacon-api.publicnode.com`
@@ -41,7 +41,7 @@ All environment variables are optional and defined in `.env`. Defaults are used 
   - **Description**: Path to an existing JSON file mapping Ethereum addresses to labels for blob submitters, sourced from Dune query data.
   - **Default**: `assets/blob-submitters.json`
 - `HISTORY_FILE`
-  - **Description**: Path to the file storing historical block data with blobs.
+  - **Description**: Path to the file storing historical block data sent via WebSocket.
   - **Default**: `output/blocks.json`
 - `HISTORY_RETENTION_SECONDS`
   - **Description**: Duration (in seconds) to retain historical block data before pruning.
@@ -58,7 +58,7 @@ All environment variables are optional and defined in `.env`. Defaults are used 
   - **Description**: Enables or disables console logging alongside file output.
   - **Default**: `true`
 - `LOG_LEVEL`
-  - **Description**: Sets the logging level for Pino.
+  - **Description**: Sets the logging level.
   - **Default**: `info`
 - `LOG_FILE`
   - **Description**: Path to the log file.

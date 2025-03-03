@@ -140,7 +140,6 @@ export class BlobDataService {
                     this.namedAddresses.get(blobTx.from) ?? "",
                     blobTx.to,
                     blob.getBlobVersionedHash(),
-                    GAS_PER_BLOB,  // TODO: remove this parameter because it is a constant
                     BigInt(actualSize),
                     blobFee,
                     executionTxFeePerBlob);
@@ -235,7 +234,8 @@ export class BlobDataService {
             : [];
 
         // Add the new block to the list
-        logger.info(`Adding block to history: ${blockWithBlobs.blockNumber}`);
+        logger.info({numOfBlobs: blockWithBlobs.blobs.length}, `Adding block to history: ${blockWithBlobs.blockNumber}`);
+        logger.trace(blockWithBlobs, "Block with blobs");
         blocks.push(blockWithBlobs);
 
         // Filter out blocks older than the retention threshold
