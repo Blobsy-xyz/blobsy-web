@@ -25,13 +25,13 @@ function adoptData(data: any): any {
         ...data,
         block_number: data.blockNumber,
         block_timestamp: data.blockTimestamp,
-        new_tx_fee: Math.round((data.executionFeeEstimate) / 1e9),
-        new_blob_fee: Math.round((data.blobFeeEstimate) / 1e9),
+        new_tx_fee: Math.round(Number(data.executionFeeEstimate) / 1e9),
+        new_blob_fee: Math.round(Number(data.blobFeeEstimate) / 1e9),
         blobs: data.blobs.map((blob: any) => ({
             ...blob,
             name: blob.fromName ? blob.fromName : blob.from.slice(0, 15),
-            filled: Math.ceil(blob.actualBlobSize / blob.blobSize * 100),
-            blob_fee: Math.round((blob.blobFee + blob.executionTxFee) / 1e9),
+            filled: Math.ceil(Number(blob.actualBlobSize) / Number(blob.blobSize) * 100),
+            blob_fee: Math.round(Number (BigInt(blob.blobFee) + BigInt(blob.executionTxFee)) / 1e9),
             color: randomColor(blob.hash),
         })),
     };
@@ -42,9 +42,10 @@ class WebSocketService {
 
     connect() {
         // Use environment variable with fallback for development
-        const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:9933/blob-info';
-        this.socket = new WebSocket(wsUrl);
+        console.log('Env var to connect to...', process.env.REACT_APP_WS_URL);
+        const wsUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:9933/blob-info';
         console.log('Connecting to WebSocket server...', wsUrl);
+        this.socket = new WebSocket(wsUrl);
         this.socket.onopen = () => console.log('Connected to WebSocket server.');
         this.socket.onmessage = (event) => {
             try {
