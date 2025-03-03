@@ -56,20 +56,24 @@ export class BlobDataService {
      * @returns {@link BlockWithBlobs} {@link Result} or an error.
      */
     public async processBlock(block: Block): Promise<Result<BlockWithBlobs, Error>> {
-        logger.info(`Processing block ${block.number}`);
-
         if (block.number == null) {
             return failure(new Error('Block number is null'));
         }
 
         // Validate block
         if (this.previousBlock === block.number) {
-            return failure(new BlockProcessingWarning(`Skipping already processed block ${block.number}.`));
+            return failure(new BlockProcessingWarning(
+                `Skipping duplicate block ${block.number} (previously processed). This may indicate an unstable RPC node re-sending data. Ensure a stable connection or switch to a premium/private node provider.`
+            ));
         }
         if (this.previousBlock !== 0n && this.previousBlock + 1n !== block.number) {
-            logger.warn(`Missed block ${this.previousBlock + 1n} after processing ${this.previousBlock}`);
+            logger.warn(
+                `Missed block ${this.previousBlock + 1n} after ${this.previousBlock}. RPC node may be overloaded or out-of-sync. Ensure a stable connection or switch to a premium/private node provider.`
+            );
         }
-        this.previousBlock = block.number
+
+        logger.info(`Processing block ${block.number}`);
+        this.previousBlock = block.number;
 
         if (!isTransactionArray(block.transactions)) {
             return failure(new Error('Block does not have full info about transactions. Include "includeTransactions: true" when fetching the block'));
@@ -193,7 +197,7 @@ export class BlobDataService {
         try {
             const rawData = readFileSync(this.historyFile, 'utf-8');
             this.historyCache = plainToInstance(BlockWithBlobs, JSON.parse(rawData)) as BlockWithBlobs[];
-            return this.historyCache
+            return this.historyCache;
         } catch (error) {
             logger.error(error, `Failed to load history from ${this.historyFile}`);
             this.historyCache = null;
