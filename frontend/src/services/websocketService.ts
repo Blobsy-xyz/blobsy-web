@@ -21,6 +21,7 @@ function randomColor(hash: string): string {
 }
 
 function adoptData(data: any): any {
+    const blobSize = 131072;
     return {
         ...data,
         block_number: data.blockNumber,
@@ -30,7 +31,7 @@ function adoptData(data: any): any {
         blobs: data.blobs.map((blob: any) => ({
             ...blob,
             name: blob.fromName ? blob.fromName : blob.from.slice(0, 15),
-            filled: Math.ceil(Number(blob.actualBlobSize) / Number(blob.blobSize) * 100),
+            filled: Math.ceil(Number(blob.actualBlobSize) / blobSize * 100),
             blob_fee: Math.round(Number (BigInt(blob.blobFee) + BigInt(blob.executionTxFee)) / 1e9),
             color: randomColor(blob.hash),
         })),
