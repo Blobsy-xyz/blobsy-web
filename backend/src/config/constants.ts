@@ -11,4 +11,4 @@ export const GAS_PER_BLOB = BigInt(32 * 4096);
  *  - [Average Execution Gas Usage by Blob Submitters](https://dune.com/queries/4711922/7831269)
  *  - [Execution Gas Usage Distribution for Blob Submitters](https://dune.com/queries/4712158/7831324)
  */
-export const BLOB_AGG_TX_GAS_USED_ESTIMATE = 500000n;
+export const BLOB_AGG_TX_GAS_USED_ESTIMATE = 250000n;

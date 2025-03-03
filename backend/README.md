@@ -51,7 +51,7 @@ All environment variables are optional and defined in `.env`. Defaults are used 
   - **Default**: `20`
 - `BLOB_AGG_TX_GAS_USED_ESTIMATE`
   - **Description**: Estimated execution gas usage for a blob aggregation transaction.
-  - **Default**: `500000`
+  - **Default**: `250000`
 
 ### Logging Configuration
 - `LOG_CONSOLE`
@@ -72,3 +72,46 @@ The backend exposes the following endpoints on the configured `PORT` (default: `
 - **HTTP GET: `/blob-info-history`**
   - **Description**: Retrieves historical block data from the history file, with a configurable timespan set by `HISTORY_RETENTION_SECONDS`.  
   - **Usage**: Fetch via HTTP (e.g., `http://localhost:9933/blob-info-history`) for persisted data.
+
+## Data Structure
+### `BlockWithBlobs` JSON Representation
+```json
+{
+    "blockNumber": "21954187",
+    "blockTimestamp": "1740858251",
+    "blobFeeEstimate": "131072",
+    "executionFeeEstimate": "421228250500000",
+    "blobs": [
+      {
+        "id": "657",
+        "hash": "0xd431539efad13c2054ba519cf57a7e0d5509aba129e4b86cb36a147540a93df2",
+        "from": "0x000000633b68f5d8d3a86593ebb815b4663bcbe0",
+        "fromName": "Taiko (Official)",
+        "to": "0x68d30f47f19c07bccef4ac7fae2dc12fca3e0dc9",
+        "blobVersionedHash": "0x01a1c404e970a5ff58adca078ac9f2bceea077c9c1f4a2d27a469f38a8e8d682",
+        "actualBlobSize": "52480",
+        "blobFee": "131072",
+        "executionTxFee": "410685064876896"
+      }
+    ]
+  }
+```
+
+#### Top-Level Fields
+- **`blockNumber`**: The Ethereum block number of the processed block.
+- **`blockTimestamp`**: The Unix timestamp (in seconds) when the block was mined.
+- **`blobFeeEstimate`**: An estimate of the blob fee (in wei) for the next block, calculated as the average blob fee from the latest block with blobs.
+- **`executionFeeEstimate`**: An estimate of the execution fee (in wei) for a blob aggregator transaction in the next block, computed using the median gas fee (at the specified `AGGREGATOR_REWARD_PERCENTILE`) and the `BLOB_AGG_TX_GAS_USED_ESTIMATE`.
+- **`blobs`**: An array of objects, each representing blob sidecar data.
+
+#### `blobs` Array
+Each object in the `blobs` array contains the following fields:
+- **`id`**: A unique identifier for the blob, derived from sender and receiver addresses. Used to deterministically identify blobs with the same sender and receiver.
+- **`hash`**: Transaction hash.
+- **`from`**: Blob submitter Ethereum address.
+- **`fromName`**: A human-readable label for the sender’s address, sourced from the `NAMED_BLOB_SUBMITTERS_FILE`. Empty if no label is associated with the address.
+- **`to`**: Transaction recipient. It can be an empty string if the transaction creates a contract.
+- **`blobVersionedHash`**: Versioned hash of the blob, computed from its KZG commitment as defined in EIP-4844, uniquely identifying the blob’s content.
+- **`actualBlobSize`**: The actual size of the blob data (in bytes) after trimming trailing zero-filled 32-byte chunks, providing the effective data size.
+- **`blobFee`**: The blob fee paid for one blob (in wei), calculated as the blob gas price from the transaction receipt multiplied by `GAS_PER_BLOB`.
+- **`executionTxFee`**: The portion of the transaction’s execution fee (in wei) attributed to this blob, computed by dividing the total execution fee (`effectiveGasPrice * gasUsed`) by the number of blobs in the transaction.
