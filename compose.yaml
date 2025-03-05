@@ -1,0 +1,28 @@
+services:
+  backend:
+    container_name: blobsy-ws
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - backend/.env
+    ports:
+      - "${PORT:-9933}:9933"
+    volumes:
+      - ./backend/data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:$${PORT:-9933}/blob-info-history || exit 1"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  frontend:
+    container_name: blobsy-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    depends_on:
+      - backend

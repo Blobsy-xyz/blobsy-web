@@ -1,0 +1,9 @@
+node_modules
+dist
+data
+assets
+test
+jest.config.ts
+*.log
+.env*
+README.md
