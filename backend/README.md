@@ -9,6 +9,9 @@ The service processes blocks with EIP-4844 blob transactions, calculates all nec
 - Persists processed block data, including blob details, to a history file for later retrieval via additional HTTP endpoint.
 
 # Setup Instructions
+Setup instructions are relevant only if you choose to run the backend service locally, outside the Docker environment. 
+For Docker-based setup, see the [main README](../README.md) and [Environment Variables](#environment-variables) sections.
+
 ### 1. Install Dependencies
 In `backend/` run `npm install`
 
@@ -25,7 +28,7 @@ which restarts the service automatically on source code changes.
 ### Tests
 To run tests, use `npm test`.
 
-## Environment Variables
+# Environment Variables
 All environment variables are optional and defined in `.env`. Defaults are used if not specified. Copy `.env.example` to `.env` and customize as needed. See below for details and validation rules.
 
 - `NODE_WS_URL`
@@ -64,7 +67,7 @@ All environment variables are optional and defined in `.env`. Defaults are used 
   - **Description**: Path to the log file.
   - **Default**: `logs/app.log`
 
-## Endpoints
+# Endpoints
 The backend exposes the following endpoints on the configured `PORT` (default: `9933`):
 - **WebSocket: `/blob-info`**
   - **Description**: Streams real-time blob data as blocks are processed.
@@ -73,7 +76,7 @@ The backend exposes the following endpoints on the configured `PORT` (default: `
   - **Description**: Retrieves historical block data from the history file, with a configurable timespan set by `HISTORY_RETENTION_SECONDS`.  
   - **Usage**: Fetch via HTTP (e.g., `http://localhost:9933/blob-info-history`) for persisted data.
 
-## Data Structure
+# Data Structure
 ### `BlockWithBlobs` JSON Representation
 ```json
 {
