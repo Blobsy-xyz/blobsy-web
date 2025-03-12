@@ -49,7 +49,7 @@ const Header: React.FC = () => {
                         zIndex: 10
                     }}
                 ><small>
-                    Realtime blob aggregation experiment.<br/>
+                    Realtime blob aggregation simulation.<br/>
                     Alpha means bugs.<br/><br/>
                     Currently, the aggregation algorithm is very simple:<br/>
                     <ul>

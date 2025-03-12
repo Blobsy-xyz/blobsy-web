@@ -1,46 +1,97 @@
-# Getting Started with Create React App
+# Blobsy Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
-## Available Scripts
+## 🌊 Overview
 
-In the project directory, you can run:
+The Blobsy frontend provides a real-time visualization dashboard for Ethereum blob data and simulates potential blob
+aggregation benefits. It connects to the backend service to receive live blob transaction data and applies a simple
+aggregation algorithm to demonstrate cost savings and efficiency improvements.
 
-### `npm start`
+## 🧩 How It Works
 
-Runs the app in the development mode.\
-Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
+The blob aggregation simulation algorithm follows these steps:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+1. **Blob Collection**: Waits for new Ethereum blocks and collects blobs from transactions
+2. **Queue Management**: Places incoming blobs into a processing queue
+3. **MegaBlob Creation**: Processes the queue and creates a MegaBlob when any of these conditions are met:
+    - A single blob is more than 85% full
+    - Multiple blobs can be aggregated to reach more than 85% capacity utilization
+    - A blob has been waiting in the queue for more than 5 blocks
 
-### `npm test`
+This simulation helps visualize the potential benefits of blob aggregation in terms of cost savings and finality
+improvements for rollups and developers.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 📊 Features
 
-### `npm run build`
+- **Real-time Dashboard**: Visualizes live blob data from the Ethereum network
+- **Aggregation Simulation**: Demonstrates potential savings through blob aggregation
+- **Rollup Analytics**: Provides breakdown of savings by sender (L2 rollup)
+- **Historical Data**: Shows trends and patterns in blob usage over time
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🚀 Setup Instructions
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+> **Note**: These instructions are relevant only if you choose to run the frontend service locally, outside the Docker
+> environment. For Docker-based setup, see the [main README](../README.md).
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Prerequisites
 
-### `npm run eject`
+- Node.js 16 or higher
+- npm or yarn
+- Running Blobsy backend service
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Installation Steps
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. **Install Dependencies**
+   ```bash
+   cd frontend
+   npm install
+   ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+2. **Set up Environment Variables (optional)**
+   Copy the `.env.example` file to `.env` and customize values if desired:
+   ```bash
+   cp .env.example .env
+   ```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+3. **Start the Frontend Service**
+   ```bash
+   npm start
+   ```
 
-## Learn More
+   The application will be accessible at [http://localhost:3001](http://localhost:3001).
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🔧 Configuration
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+The frontend can be configured through environment variables in the `.env` file:
+
+| Variable                     | Description                            | Default                 |
+|------------------------------|----------------------------------------|-------------------------|
+| `REACT_APP_BACKEND_URL`      | URL of the Blobsy backend service      | `http://localhost:9933` |
+| `REACT_APP_REFRESH_INTERVAL` | Data refresh interval in milliseconds  | `5000`                  |
+| `PORT`                       | Port on which the frontend server runs | `3001`                  |
+
+## 🔄 Development Workflow
+
+For development:
+
+1. Start the backend service following the [backend setup instructions](../backend/README.md)
+2. Run the frontend in development mode with `npm start`
+3. Make changes to the code - the application will automatically reload
+
+## 🧪 Testing
+
+Run the test suite with:
+
+```bash
+npm test
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please see the [main README](../README.md#contributing) for contribution guidelines.
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+
