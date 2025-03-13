@@ -11,13 +11,15 @@
     "react-dom": "^19.0.0",
     "react-redux": "^9.2.0",
     "react-scripts": "5.0.1",
+    "serve": "^14.2.1",
     "uuid": "^11.0.5"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "serve": "serve -s build -l $PORT"
   },
   "eslintConfig": {
     "extends": [

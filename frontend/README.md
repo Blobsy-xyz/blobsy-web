@@ -67,8 +67,7 @@ The frontend can be configured through environment variables in the `.env` file:
 
 | Variable                     | Description                            | Default                 |
 |------------------------------|----------------------------------------|-------------------------|
-| `REACT_APP_BACKEND_URL`      | URL of the Blobsy backend service      | `http://localhost:9933` |
-| `REACT_APP_REFRESH_INTERVAL` | Data refresh interval in milliseconds  | `5000`                  |
+| `REACT_APP_WS_URL`      | URL of the Blobsy backend service      | `http://localhost:9933` |
 | `PORT`                       | Port on which the frontend server runs | `3001`                  |
 
 ## 🔄 Development Workflow
